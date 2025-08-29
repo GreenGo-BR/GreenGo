@@ -1,0 +1,578 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 142.1 76.2% 96.3%;
+    --accent-foreground: 142.1 76.2% 16.3%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 120 100% 6%;
+    --foreground: 0 0% 95%;
+    --card: 120 50% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 120 50% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 120 100% 60%;
+    --primary-foreground: 120 100% 6%;
+    --secondary: 120 30% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 120 30% 15%;
+    --muted-foreground: 0 0% 75%;
+    --accent: 120 50% 20%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 120 30% 15%;
+    --input: 120 30% 15%;
+    --ring: 120 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply text-foreground;
+    /* Background padrão (modo claro) - padrão repetido */
+    background-color: #eefdf3;
+    background-image: url("/images/bg-cans-final.png");
+    background-repeat: repeat;
+    background-size: auto;
+    background-position: top left;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Dark Mode - Imagem de fundo igual ao modo claro */
+  .dark body {
+    background-color: #0b1c14;
+    background-image: url("/images/design-sem-nome-4.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Mobile - manter as mesmas propriedades do desktop */
+  @media (max-width: 768px) {
+    body {
+      background-attachment: scroll; /* Melhor performance em mobile */
+    }
+
+    .dark body {
+      background-size: cover;
+      background-position: center top;
+      background-attachment: scroll; /* Melhor performance em mobile */
+    }
+  }
+}
+
+/* Animações para latinhas flutuantes */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-25px);
+  }
+}
+
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Animação de scroll contínuo para a direita */
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+/* Container principal das latinhas - sem cortes visuais */
+.latinha-container {
+  width: 100vw;
+  overflow: hidden;
+  position: absolute;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Track das latinhas com movimento contínuo */
+.latinha-track {
+  display: flex;
+  gap: 40px;
+  animation: scroll-right 40s linear infinite;
+  width: max-content;
+  will-change: transform;
+}
+
+/* Latinha individual */
+.latinha {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Animações de flutuação individuais com delays variados */
+.latinha:nth-child(1) {
+  animation: float 4s ease-in-out infinite 0s;
+}
+.latinha:nth-child(2) {
+  animation: float-slow 4.5s ease-in-out infinite 0.5s;
+}
+.latinha:nth-child(3) {
+  animation: float-fast 3.8s ease-in-out infinite 1s;
+}
+.latinha:nth-child(4) {
+  animation: float 4.2s ease-in-out infinite 1.5s;
+}
+.latinha:nth-child(5) {
+  animation: float-slow 4.8s ease-in-out infinite 2s;
+}
+.latinha:nth-child(6) {
+  animation: float-fast 3.5s ease-in-out infinite 2.5s;
+}
+.latinha:nth-child(7) {
+  animation: float 4.6s ease-in-out infinite 3s;
+}
+.latinha:nth-child(8) {
+  animation: float-slow 4.3s ease-in-out infinite 0.2s;
+}
+.latinha:nth-child(9) {
+  animation: float-fast 3.9s ease-in-out infinite 0.7s;
+}
+.latinha:nth-child(10) {
+  animation: float 4.1s ease-in-out infinite 1.2s;
+}
+.latinha:nth-child(11) {
+  animation: float-slow 4.7s ease-in-out infinite 1.7s;
+}
+.latinha:nth-child(12) {
+  animation: float-fast 3.6s ease-in-out infinite 2.2s;
+}
+.latinha:nth-child(13) {
+  animation: float 4.4s ease-in-out infinite 2.7s;
+}
+.latinha:nth-child(14) {
+  animation: float-slow 4.9s ease-in-out infinite 3.2s;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .latinha-track {
+    gap: 30px;
+    animation-duration: 35s; /* Ligeiramente mais rápido em mobile */
+  }
+
+  .latinha {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Dark mode adjustments */
+.dark .latinha {
+  opacity: 0.7;
+  filter: brightness(1.2) hue-rotate(10deg);
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-fast {
+  animation: float-fast 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Latinhas flutuantes para hero sections específicas */
+.hero-floating-can {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1; /* Acima do background, mas abaixo do conteúdo principal */
+  opacity: 0.6;
+  /* Remover bordas e outlines */
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.hero-floating-can img {
+  /* Remover bordas das imagens */
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.dark .hero-floating-can {
+  opacity: 0.5;
+  filter: brightness(1.2) hue-rotate(10deg);
+}
+
+/* Glass effect - Modo Claro */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 1rem; /* rounded-2xl */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 10; /* Sobrepor o fundo */
+}
+
+/* Glass effect - Dark Mode: Cards escurecidos e mais opacos */
+.dark .glass {
+  background: rgba(18, 30, 25, 0.85); /* #121e19 com 85% opacidade */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #2d4b3a;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  color: #f3f4f6; /* text-gray-100 */
+}
+
+/* Glass Button - Botão com efeito glass */
+.glass-button {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Glass Button - Dark Mode */
+.dark .glass-button {
+  background: rgba(18, 30, 25, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(45, 75, 58, 0.5) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .glass-button:hover {
+  background: rgba(18, 30, 25, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Garantir que o conteúdo principal fique acima do background */
+.main-content {
+  position: relative;
+  z-index: 10;
+}
+
+/* Hero content com z-index alto para ficar acima das latinhas */
+.hero-content {
+  position: relative;
+  z-index: 20;
+}
+
+/* Navigation - Modo Claro */
+nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  z-index: 50;
+}
+
+/* Navigation - Dark Mode: Menu inferior fixo com ícones esverdeados */
+.dark nav {
+  background: #0b1c14; /* Fundo sólido escuro */
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
+  -webkit-backdrop-filter: blur(4px);
+  border-top: 1px solid #2d4b3a;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Ícones da navegação - Dark Mode: tons esverdeados */
+.dark nav a {
+  color: rgba(45, 103, 79, 0.7) !important; /* #2D674F com opacity-70 para passivos */
+}
+
+.dark nav a.text-primary,
+.dark nav a[data-active="true"] {
+  color: #40a578 !important; /* #40A578 para ícones ativos */
+}
+
+/* Footer - Modo Claro */
+footer {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  z-index: 10;
+}
+
+/* Footer - Dark Mode */
+.dark footer {
+  background: rgba(18, 30, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid #2d4b3a;
+  color: #f3f4f6;
+}
+
+/* Tipografia e ícones claros no Dark Mode */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark p,
+.dark span,
+.dark div {
+  color: #f3f4f6 !important; /* text-gray-100 */
+}
+
+.dark .text-muted-foreground {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark svg {
+  fill: rgba(255, 255, 255, 0.9);
+}
+
+/* Textos específicos em preto no modo escuro para melhor contraste */
+.dark .hero-content p.text-lg,
+.dark .page-title,
+.dark .profile-name,
+.dark .profile-email {
+  color: #000 !important;
+}
+
+/* Remover bordas de logos e imagens */
+.logo-image,
+.logo-image img,
+img[src*="greengo"],
+img[src*="latinha"] {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Inputs e selects - Modo Claro */
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  z-index: 10;
+}
+
+/* Inputs e selects - Dark Mode */
+.dark input,
+.dark select,
+.dark textarea {
+  background: rgba(18, 30, 25, 0.8) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid #2d4b3a !important;
+  color: #f3f4f6 !important;
+}
+
+/* Botões com z-index adequado */
+button,
+.button,
+a[role="button"] {
+  position: relative;
+  z-index: 10;
+}
+
+/* Botões primários - Dark Mode */
+.dark .bg-primary {
+  background-color: #40a578 !important;
+  color: #0b1c14 !important;
+}
+
+.dark .text-primary {
+  color: #40a578 !important;
+}
+
+/* Links - Dark Mode */
+.dark a {
+  color: #40a578;
+}
+
+.dark a:hover {
+  color: #22c55e;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.6);
+  border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(64, 165, 120, 0.6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.8);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(64, 165, 120, 0.8);
+}
+
+/* Efeito hover para cards - Modo Claro */
+.glass:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Efeito hover para cards - Dark Mode */
+.dark .glass:hover {
+  background: rgba(18, 30, 25, 0.95);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Popover e dropdown - Modo Claro */
+.popover-content,
+.dropdown-content,
+[data-radix-popper-content-wrapper] {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  z-index: 100;
+}
+
+/* Popover e dropdown - Dark Mode */
+.dark .popover-content,
+.dark .dropdown-content {
+  background: rgba(18, 30, 25, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid #2d4b3a;
+  color: #f3f4f6;
+}
+
+/* Tabs - Modo Claro */
+.tabs-list {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  z-index: 10;
+}
+
+/* Tabs - Dark Mode */
+.dark .tabs-list {
+  background: rgba(18, 30, 25, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid #2d4b3a;
+}
+
+/* Badges - Dark Mode */
+.dark .bg-blue-500 {
+  background-color: #3b82f6 !important;
+}
+
+.dark .bg-green-500 {
+  background-color: #40a578 !important;
+}
+
+.dark .bg-red-500 {
+  background-color: #ef4444 !important;
+}
+
+.dark .bg-yellow-500 {
+  background-color: #eab308 !important;
+}
+
+/* Muted backgrounds - Dark Mode */
+.dark .bg-muted {
+  background-color: rgba(18, 30, 25, 0.6) !important;
+}
+
+.dark .bg-muted\/50 {
+  background-color: rgba(18, 30, 25, 0.5) !important;
+}
