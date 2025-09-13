@@ -1,33 +1,25 @@
-"use client"
+"use client";
 
-import { HeroSection } from "@/components/hero-section"
-import { CollectionCard } from "@/components/collection-card"
-import { WalletCard } from "@/components/wallet-card"
-import { Button } from "@/components/ui/button"
-import Navigation from "@/components/navigation"
-import Link from "next/link"
-import { useLanguage } from "@/contexts/language-context"
-import { useScrollToTop } from "@/hooks/use-scroll-to-top"
+import { useState, useEffect } from "react";
+import { HeroSection } from "@/components/hero-section";
+import { CollectionCard } from "@/components/collection-card";
+import { WalletCard } from "@/components/wallet-card";
+import { Button } from "@/components/ui/button";
+import Navigation from "@/components/navigation";
+import Link from "next/link";
+import { useLanguage } from "@/contexts/language-context";
+import { useScrollToTop } from "@/hooks/use-scroll-to-top";
+import { withAuth } from "@/components/withAuth";
+import { api } from "@/lib/api";
 
-// Dados simulados para demonstração
-const upcomingCollections = [
-  {
-    id: "col123456",
-    date: "24/05/2024",
-    time: "14:00 - 16:00",
-    address: "Rua das Flores, 123 - Jardim Primavera",
-    status: "scheduled" as const,
-    estimatedWeight: 3.5,
-  },
-  {
-    id: "col123457",
-    date: "28/05/2024",
-    time: "10:00 - 12:00",
-    address: "Av. Principal, 456 - Centro",
-    status: "pending" as const,
-    estimatedWeight: 2,
-  },
-]
+type Collection = {
+  id: string;
+  date: string;
+  time: string;
+  address: string;
+  status: "scheduled" | "pending" | "completed";
+  estimatedWeight: number;
+};
 
 const walletData = {
   balance: 87.5,
@@ -35,11 +27,50 @@ const walletData = {
     amount: 17.5,
     date: "18/05/2024",
   },
-}
+};
 
-export default function HomePage() {
-  const { t } = useLanguage()
-  useScrollToTop()
+type HomePageProps = {
+  token: string;
+};
+
+function HomePage({ token }: HomePageProps) {
+  const { t } = useLanguage();
+  useScrollToTop();
+  const [upcomingCollections, setCollections] = useState<Collection[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await fetchUpcommingCollections(token);
+      } catch (err) {
+        console.error("Failed to load collections:", err);
+      }
+    };
+    load();
+  }, [token]);
+
+  const fetchUpcommingCollections = async (token: string) => {
+    try {
+      const res = await api().get("/collections", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const fetchedList = res.data.collections;
+
+      const normalized = fetchedList.map((fetched: any) => ({
+        id: fetched.ID,
+        date: fetched.CollectionDate,
+        time: fetched.CollectionTime,
+        address: fetched.PickupAddress,
+        status: fetched.Status,
+        estimatedWeight: fetched.Weight,
+      }));
+
+      setCollections(normalized);
+    } catch (error) {
+      console.error("Error fetching collection details:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -63,7 +94,9 @@ export default function HomePage() {
             </div>
 
             {upcomingCollections.length > 0 ? (
-              upcomingCollections.map((collection) => <CollectionCard key={collection.id} {...collection} />)
+              upcomingCollections.map((collection) => (
+                <CollectionCard key={collection.id} {...collection} />
+              ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t("home.noCollections")}</p>
@@ -74,5 +107,6 @@ export default function HomePage() {
       </main>
       <Navigation />
     </div>
-  )
+  );
 }
+export default withAuth(HomePage);

@@ -124,8 +124,10 @@ export const authTranslations = {
     "en-US": "We've sent a password reset link",
   },
   "auth.reset.confirm.message": {
-    "pt-BR": "Verifique sua caixa de entrada e clique no link enviado para redefinir sua senha.",
-    "en-US": "Check your inbox and click the link we sent to reset your password.",
+    "pt-BR":
+      "Verifique sua caixa de entrada e clique no link enviado para redefinir sua senha.",
+    "en-US":
+      "Check your inbox and click the link we sent to reset your password.",
   },
   "auth.reset.new.title": {
     "pt-BR": "Criar nova senha",
@@ -211,4 +213,12 @@ export const authTranslations = {
     "pt-BR": "Voltar para recuperação",
     "en-US": "Back to reset",
   },
-}
+  "auth.login.or": {
+    "en-US": "or",
+    "pt-BR": "ou",
+  },
+  "auth.login.whatsapp": {
+    "en-US": "Continue with WhatsApp",
+    "pt-BR": "Entrar com WhatsApp",
+  },
+};

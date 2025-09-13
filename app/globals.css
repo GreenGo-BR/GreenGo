@@ -84,43 +84,51 @@
   /* Mobile - manter as mesmas propriedades do desktop */
   @media (max-width: 768px) {
     body {
-      background-attachment: scroll; /* Melhor performance em mobile */
+      background-attachment: scroll;
+      /* Melhor performance em mobile */
     }
 
     .dark body {
       background-size: cover;
       background-position: center top;
-      background-attachment: scroll; /* Melhor performance em mobile */
+      background-attachment: scroll;
+      /* Melhor performance em mobile */
     }
   }
 }
 
 /* Animações para latinhas flutuantes */
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-20px);
   }
 }
 
 @keyframes float-slow {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-25px);
   }
 }
 
 @keyframes float-fast {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-15px);
   }
@@ -131,6 +139,7 @@
   0% {
     transform: translateX(-50%);
   }
+
   100% {
     transform: translateX(0%);
   }
@@ -171,42 +180,55 @@
 .latinha:nth-child(1) {
   animation: float 4s ease-in-out infinite 0s;
 }
+
 .latinha:nth-child(2) {
   animation: float-slow 4.5s ease-in-out infinite 0.5s;
 }
+
 .latinha:nth-child(3) {
   animation: float-fast 3.8s ease-in-out infinite 1s;
 }
+
 .latinha:nth-child(4) {
   animation: float 4.2s ease-in-out infinite 1.5s;
 }
+
 .latinha:nth-child(5) {
   animation: float-slow 4.8s ease-in-out infinite 2s;
 }
+
 .latinha:nth-child(6) {
   animation: float-fast 3.5s ease-in-out infinite 2.5s;
 }
+
 .latinha:nth-child(7) {
   animation: float 4.6s ease-in-out infinite 3s;
 }
+
 .latinha:nth-child(8) {
   animation: float-slow 4.3s ease-in-out infinite 0.2s;
 }
+
 .latinha:nth-child(9) {
   animation: float-fast 3.9s ease-in-out infinite 0.7s;
 }
+
 .latinha:nth-child(10) {
   animation: float 4.1s ease-in-out infinite 1.2s;
 }
+
 .latinha:nth-child(11) {
   animation: float-slow 4.7s ease-in-out infinite 1.7s;
 }
+
 .latinha:nth-child(12) {
   animation: float-fast 3.6s ease-in-out infinite 2.2s;
 }
+
 .latinha:nth-child(13) {
   animation: float 4.4s ease-in-out infinite 2.7s;
 }
+
 .latinha:nth-child(14) {
   animation: float-slow 4.9s ease-in-out infinite 3.2s;
 }
@@ -215,7 +237,8 @@
 @media (max-width: 768px) {
   .latinha-track {
     gap: 30px;
-    animation-duration: 35s; /* Ligeiramente mais rápido em mobile */
+    animation-duration: 35s;
+    /* Ligeiramente mais rápido em mobile */
   }
 
   .latinha {
@@ -249,7 +272,8 @@
 .hero-floating-can {
   position: absolute;
   pointer-events: none;
-  z-index: 1; /* Acima do background, mas abaixo do conteúdo principal */
+  z-index: 1;
+  /* Acima do background, mas abaixo do conteúdo principal */
   opacity: 0.6;
   /* Remover bordas e outlines */
   background: transparent !important;
@@ -276,21 +300,26 @@
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 1rem; /* rounded-2xl */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  border-radius: 1rem;
+  /* rounded-2xl */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  /* shadow-md */
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
-  z-index: 10; /* Sobrepor o fundo */
+  z-index: 10;
+  /* Sobrepor o fundo */
 }
 
 /* Glass effect - Dark Mode: Cards escurecidos e mais opacos */
 .dark .glass {
-  background: rgba(18, 30, 25, 0.85); /* #121e19 com 85% opacidade */
+  background: rgba(18, 30, 25, 0.85);
+  /* #121e19 com 85% opacidade */
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid #2d4b3a;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  color: #f3f4f6; /* text-gray-100 */
+  color: #f3f4f6;
+  /* text-gray-100 */
 }
 
 /* Glass Button - Botão com efeito glass */
@@ -350,8 +379,10 @@ nav {
 
 /* Navigation - Dark Mode: Menu inferior fixo com ícones esverdeados */
 .dark nav {
-  background: #0b1c14; /* Fundo sólido escuro */
-  backdrop-filter: blur(4px); /* backdrop-blur-sm */
+  background: #0b1c14;
+  /* Fundo sólido escuro */
+  backdrop-filter: blur(4px);
+  /* backdrop-blur-sm */
   -webkit-backdrop-filter: blur(4px);
   border-top: 1px solid #2d4b3a;
   position: fixed;
@@ -362,12 +393,14 @@ nav {
 
 /* Ícones da navegação - Dark Mode: tons esverdeados */
 .dark nav a {
-  color: rgba(45, 103, 79, 0.7) !important; /* #2D674F com opacity-70 para passivos */
+  color: rgba(45, 103, 79, 0.7) !important;
+  /* #2D674F com opacity-70 para passivos */
 }
 
 .dark nav a.text-primary,
 .dark nav a[data-active="true"] {
-  color: #40a578 !important; /* #40A578 para ícones ativos */
+  color: #40a578 !important;
+  /* #40A578 para ícones ativos */
 }
 
 /* Footer - Modo Claro */
@@ -398,11 +431,13 @@ footer {
 .dark p,
 .dark span,
 .dark div {
-  color: #f3f4f6 !important; /* text-gray-100 */
+  color: #f3f4f6 !important;
+  /* text-gray-100 */
 }
 
 .dark .text-muted-foreground {
-  color: #d1d5db !important; /* text-gray-300 */
+  color: #d1d5db !important;
+  /* text-gray-300 */
 }
 
 .dark svg {

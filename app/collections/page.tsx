@@ -1,165 +1,277 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { GlassCard } from "@/components/ui/glass-card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { CollectionCard } from "@/components/collection-card"
-import { Plus, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { useLanguage } from "@/contexts/language-context"
-import { useRouter } from "next/navigation"
-import Navigation from "@/components/navigation"
-import { FloatingCans } from "@/components/floating-cans"
-import { useScrollToTop } from "@/hooks/use-scroll-to-top"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import Navigation from "@/components/navigation";
+import { Badge } from "@/components/ui/badge";
+import { GlassCard } from "@/components/ui/glass-card";
+import { EnhancedBackground } from "@/components/enhanced-background";
+import { Plus, MapPin, Calendar, Clock, Package } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
+import Link from "next/link";
+import { withAuth } from "@/components/withAuth";
+import { api } from "@/lib/api";
 
-// Dados simulados para demonstração
-const collections = [
-  {
-    id: "col123456",
-    date: "25/05/2024",
-    time: "14:00 - 16:00",
-    address: "Rua das Palmeiras, 789 - Vila Nova",
-    status: "scheduled" as const,
-    estimatedWeight: 5.5,
-  },
-  {
-    id: "col123455",
-    date: "18/05/2024",
-    time: "15:00 - 17:00",
-    address: "Rua das Flores, 123 - Jardim Primavera",
-    status: "completed" as const,
-    estimatedWeight: 4.2,
-  },
-  {
-    id: "col123454",
-    date: "10/05/2024",
-    time: "09:00 - 11:00",
-    address: "Av. Principal, 456 - Centro",
-    status: "completed" as const,
-    estimatedWeight: 3,
-  },
-  {
-    id: "col123453",
-    date: "05/05/2024",
-    time: "16:00 - 18:00",
-    address: "Rua do Comércio, 321 - Centro",
-    status: "cancelled" as const,
-    estimatedWeight: 2.8,
-  },
-  {
-    id: "col123452",
-    date: "28/04/2024",
-    time: "10:00 - 12:00",
-    address: "Av. das Nações, 654 - Bairro Alto",
-    status: "completed" as const,
-    estimatedWeight: 6.1,
-  },
-]
+// Mock data for collections
+type mockCollections = {
+  id: string;
+  date: string;
+  time: string;
+  address: string;
+  city: string;
+  status: "scheduled" | "pending" | "completed";
+  cans: number;
+  value: number;
+};
 
-export default function CollectionsPage() {
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
-  const { language, t } = useLanguage()
-  const router = useRouter()
-  useScrollToTop()
+type ColPageProps = {
+  token: string;
+};
 
-  const statusCounts = {
-    all: collections.length,
-    scheduled: collections.filter((c) => c.status === "scheduled").length,
-    completed: collections.filter((c) => c.status === "completed").length,
-    cancelled: collections.filter((c) => c.status === "cancelled").length,
-  }
+function CollectionsPage({ token }: ColPageProps) {
+  const { t } = useLanguage();
+  const [collections, setCollections] = useState<mockCollections[]>([]);
 
-  const filteredCollections = collections.filter((collection) => {
-    if (selectedStatus === "all") return true
-    return collection.status === selectedStatus
-  })
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await fetchCollections(token);
+      } catch (err) {
+        console.error("Failed to load collections:", err);
+      }
+    };
+    load();
+  }, [token]);
+
+  const fetchCollections = async (token: string) => {
+    try {
+      const res = await api().get("/collections", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const fetchedList = res.data.collections;
+
+      const normalized = fetchedList.map((fetched: any) => ({
+        id: fetched.ID,
+        date: fetched.CollectionDate,
+        time: fetched.CollectionTime,
+        address: fetched.PickupAddress,
+        city: fetched.City,
+        status: fetched.Status,
+        cans: fetched.NumberOfItems,
+        value: fetched.Amount,
+      }));
+      setCollections(normalized);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "scheduled":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case "completed":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "cancelled":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+    }
+  };
 
   const getStatusText = (status: string) => {
-    const statusMap = {
-      all: language === "pt-BR" ? "Todas" : "All",
-      scheduled: language === "pt-BR" ? "Agendadas" : "Scheduled",
-      completed: language === "pt-BR" ? "Concluídas" : "Completed",
-      cancelled: language === "pt-BR" ? "Canceladas" : "Cancelled",
+    switch (status) {
+      case "scheduled":
+        return t("collections.status.scheduled");
+      case "completed":
+        return t("collections.status.completed");
+      case "cancelled":
+        return t("collections.status.cancelled");
+      default:
+        return status;
     }
-    return statusMap[status as keyof typeof statusMap] || status
-  }
+  };
+
+  const totalCans = collections.reduce(
+    (sum, collection) => sum + collection.cans,
+    0
+  );
+  const totalValue = collections.reduce(
+    (sum, collection) => sum + collection.value,
+    0
+  );
+  const completedCollections = collections.filter(
+    (c) => c.status === "completed"
+  ).length;
 
   return (
     <div className="min-h-screen pb-20">
-      <main className="pb-20 relative min-h-screen">
-        <div className="main-content p-4">
-          {/* Hero section com latinhas flutuantes */}
-          <div className="relative overflow-hidden mb-6 min-h-[200px]">
-            <FloatingCans count={5} />
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => router.back()}
-                    className="mr-2 dark:text-black dark:hover:text-black dark:hover:bg-gray-200"
-                  >
-                    <ArrowLeft size={20} />
-                  </Button>
-                  <h1 className="text-2xl font-bold page-title">{t("collections.title")}</h1>
-                </div>
-                <Link href="/schedule">
-                  <Button size="sm" className="bg-[#40A578] hover:bg-[#348c65]">
-                    <Plus size={16} className="mr-1" />
-                    {t("collections.new")}
-                  </Button>
-                </Link>
-              </div>
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4 md:gap-0">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              {t("collections.title")}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
+              {t("collections.subtitle")}
+            </p>
+          </div>
+          <Link href="/schedule">
+            <Button className="bg-[#40A578] hover:bg-[#348c65] text-white shadow-lg w-full md:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              {t("collections.schedule")}
+            </Button>
+          </Link>
+        </div>
 
-              {/* Estatísticas */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <GlassCard className="text-center">
-                  <p className="text-2xl font-bold text-[#40A578]">{statusCounts.completed}</p>
-                  <p className="text-sm text-muted-foreground">{t("collections.completed")}</p>
-                </GlassCard>
-                <GlassCard className="text-center">
-                  <p className="text-2xl font-bold text-blue-600">{statusCounts.scheduled}</p>
-                  <p className="text-sm text-muted-foreground">{t("collections.scheduled")}</p>
-                </GlassCard>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#40A578]/10 rounded-full">
+                <Package className="h-6 w-6 text-[#40A578]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {totalCans}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {t("collections.stats.totalCans")}
+                </p>
               </div>
             </div>
-          </div>
+          </GlassCard>
 
-          {/* Filtros */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-            {["all", "scheduled", "completed", "cancelled"].map((status) => (
-              <Badge
-                key={status}
-                variant={selectedStatus === status ? "default" : "outline"}
-                className={`cursor-pointer whitespace-nowrap ${
-                  selectedStatus === status ? "bg-[#40A578] hover:bg-[#348c65]" : "hover:bg-muted"
-                }`}
-                onClick={() => setSelectedStatus(status)}
-              >
-                {getStatusText(status)} ({statusCounts[status as keyof typeof statusCounts]})
-              </Badge>
-            ))}
-          </div>
-
-          {/* Lista de coletas */}
-          <div className="space-y-3">
-            {filteredCollections.length > 0 ? (
-              filteredCollections.map((collection) => <CollectionCard key={collection.id} {...collection} />)
-            ) : (
-              <GlassCard className="text-center py-8">
-                <p className="text-muted-foreground">
-                  {language === "pt-BR"
-                    ? "Nenhuma coleta encontrada para este filtro."
-                    : "No collections found for this filter."}
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-full">
+                <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {completedCollections}
                 </p>
-              </GlassCard>
-            )}
-          </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {t("collections.stats.completed")}
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-full">
+                <span className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                  R$
+                </span>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {totalValue.toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {t("collections.stats.totalValue")}
+                </p>
+              </div>
+            </div>
+          </GlassCard>
         </div>
-      </main>
+
+        {/* Collections List */}
+        <GlassCard className="p-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            {t("collections.recent")}
+          </h2>
+
+          {collections.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm sm:text-base">
+                {t("collections.empty")}
+              </p>
+              <Link href="/schedule">
+                <Button className="bg-[#40A578] hover:bg-[#348c65] text-white w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("collections.schedule")}
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {collections.map((collection) => (
+                <div
+                  key={collection.id}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Left info */}
+                    <div className="flex-1">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-[#40A578] mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
+                            {collection.address}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                            {collection.city}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(collection.date).toLocaleDateString(
+                            "pt-BR"
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {collection.time}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Package className="h-4 w-4" />
+                          {collection.cans} {t("collections.cans")}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right info */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2 text-sm">
+                      <div className="flex justify-between items-center sm:justify-start sm:gap-3 w-full">
+                        <div className="text-gray-900 dark:text-white font-semibold order-2 sm:order-1">
+                          R$ {collection.value.toFixed(2)}
+                        </div>
+                        <Badge
+                          className={
+                            getStatusColor(collection.status) +
+                            " order-1 sm:order-2"
+                          }
+                        >
+                          {getStatusText(collection.status)}
+                        </Badge>
+                      </div>
+                      <Link href={`/collections/${collection.id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full sm:w-auto"
+                        >
+                          {t("collections.view")}
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
+      </div>
       <Navigation />
     </div>
-  )
+  );
 }
+export default withAuth(CollectionsPage);

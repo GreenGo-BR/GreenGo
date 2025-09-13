@@ -1,10 +1,11 @@
-import type { MetadataRoute } from "next"
+import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "GreenGo - Reciclagem de Latinhas",
     short_name: "GreenGo",
-    description: "Conectando pessoas que desejam vender latinhas de alumínio com a equipe de coleta",
+    description:
+      "Conectando pessoas que desejam vender latinhas de alumínio com a equipe de coleta",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
@@ -21,5 +22,5 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
       },
     ],
-  }
+  };
 }

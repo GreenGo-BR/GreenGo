@@ -1,0 +1,9 @@
+flask
+flask-cors
+python-dotenv
+pyodbc
+Flask-JWT-Extended
+axios
+passlib[bcrypt]
+pyotp 
+qrcode[pil]

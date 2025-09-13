@@ -1,32 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { LogOut, Loader2 } from "lucide-react"
-import { useLanguage } from "@/contexts/language-context"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { LogOut, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
 
 interface LogoutConfirmationModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => Promise<void>
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => Promise<void>;
 }
 
-export function LogoutConfirmationModal({ isOpen, onClose, onConfirm }: LogoutConfirmationModalProps) {
-  const { language } = useLanguage()
-  const [isLoading, setIsLoading] = useState(false)
+export function LogoutConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
+}: LogoutConfirmationModalProps) {
+  const { language } = useLanguage();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await onConfirm()
-      onClose()
+      await onConfirm();
+
+      localStorage.removeItem("authToken");
+      router.push("/login");
+      onClose();
     } catch (error) {
-      console.error("Erro ao fazer logout:", error)
+      console.error("Erro ao fazer logout:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -58,7 +73,11 @@ export function LogoutConfirmationModal({ isOpen, onClose, onConfirm }: LogoutCo
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             {language === "pt-BR" ? "Cancelar" : "Cancel"}
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isLoading}>
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -74,5 +93,5 @@ export function LogoutConfirmationModal({ isOpen, onClose, onConfirm }: LogoutCo
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

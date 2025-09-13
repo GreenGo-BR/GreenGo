@@ -1,19 +1,47 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
-import { authTranslations } from "./auth-translations"
+import type React from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { authTranslations } from "./auth-translations";
 
-type Language = "pt-BR" | "en-US"
+type Language = "pt-BR" | "en-US";
 
 type Translations = {
   [key: string]: {
-    [key: string]: string
-  }
-}
+    [key: string]: string;
+  };
+};
 
 // Traduções expandidas do aplicativo
 const translations: Translations = {
+  "auth.2fa.title": {
+    "pt-BR": "Início",
+    "en-US": "Two-Factor Authentication",
+  },
+  "auth.2fa.subtitle": {
+    "pt-BR": "Início",
+    "en-US": "Enter the 6-digit code from your app.",
+  },
+  "auth.2fa.code": {
+    "pt-BR": "Início",
+    "en-US": "Authentication Code",
+  },
+  "auth.2fa.button": {
+    "pt-BR": "Início",
+    "en-US": "Verify",
+  },
+  "auth.2fa.loading": {
+    "pt-BR": "Início",
+    "en-US": "Verifying...",
+  },
+  "auth.2fa.backToLogin": {
+    "pt-BR": "Início",
+    "en-US": "Wrong account?",
+  },
+  "auth.2fa.login": {
+    "pt-BR": "Início",
+    "en-US": "Log in again",
+  },
   // Navegação
   "nav.home": {
     "pt-BR": "Início",
@@ -89,9 +117,41 @@ const translations: Translations = {
     "pt-BR": "Minhas Coletas",
     "en-US": "My Collections",
   },
+  "collections.subtitle": {
+    "pt-BR": "Organize e acesse facilmente seus itens salvos em coleções.",
+    "en-US": "Organize and easily access your saved items in collections.",
+  },
+  "collections.schedule": {
+    "pt-BR": "Agendar Coleta",
+    "en-US": "Schedule Collection",
+  },
   "collections.details": {
     "pt-BR": "Ver detalhes",
     "en-US": "View details",
+  },
+  "collections.view": {
+    "pt-BR": "Ver Coleções",
+    "en-US": "View Collections",
+  },
+  "collections.empty": {
+    "pt-BR": "Nenhuma coleção encontrada.",
+    "en-US": "No collections found.",
+  },
+  "collections.recent": {
+    "pt-BR": "Recentes",
+    "en-US": "Recent",
+  },
+  "collections.stats.totalCans": {
+    "pt-BR": "Total de Latas",
+    "en-US": "Total Cans",
+  },
+  "collections.stats.completed": {
+    "pt-BR": "Concluídas",
+    "en-US": "Completed",
+  },
+  "collections.stats.totalValue": {
+    "pt-BR": "Valor Total",
+    "en-US": "Total Value",
   },
   "collections.status.scheduled": {
     "pt-BR": "Agendada",
@@ -241,6 +301,10 @@ const translations: Translations = {
     "pt-BR": "Suporte",
     "en-US": "Support",
   },
+  "support.subtitle": {
+    "pt-BR": "Entre em contato com nossa equipe de suporte para obter ajuda.",
+    "en-US": "Get in touch with our support team for assistance.",
+  },
   "support.chat": {
     "pt-BR": "Chat",
     "en-US": "Chat",
@@ -270,6 +334,10 @@ const translations: Translations = {
   "notifications.title": {
     "pt-BR": "Notificações",
     "en-US": "Notifications",
+  },
+  "notifications.subtitle": {
+    "pt-BR": "Gerencie suas preferências de notificações e fique atualizado.",
+    "en-US": "Manage your notification preferences and stay updated.",
   },
   "notifications.markAllRead": {
     "pt-BR": "Marcar todas como lidas",
@@ -389,6 +457,87 @@ const translations: Translations = {
     "pt-BR": "Preferências",
     "en-US": "Preferences",
   },
+  "profile.logout": {
+    "pt-BR": "Sair",
+    "en-US": "Logout",
+  },
+  "profile.subtitle": {
+    "pt-BR": "Visualize e atualize suas informações pessoais.",
+    "en-US": "View and update your personal information.",
+  },
+  "profile.cpf": {
+    "pt-BR": "CPF",
+    "en-US": "CPF",
+  },
+  "profile.country": {
+    "pt-BR": "País",
+    "en-US": "Country",
+  },
+  "profile.changePasswordDesc": {
+    "pt-BR": "Atualize sua senha para manter sua conta segura.",
+    "en-US": "Update your password to keep your account secure.",
+  },
+  "profile.twoFactorDesc": {
+    "pt-BR": "Adicione uma camada extra de segurança à sua conta.",
+    "en-US": "Add an extra layer of security to your account.",
+  },
+  "profile.change": {
+    "pt-BR": "Mudar",
+    "en-US": "Change",
+  },
+  "profile.configure": {
+    "pt-BR": "Configurar",
+    "en-US": "Configure",
+  },
+  "profile.notificationsDesc": {
+    "pt-BR":
+      "Gerencie suas preferências de notificação para se manter atualizado sobre atividades e atualizações importantes da conta.",
+    "en-US":
+      "Manage your notification preferences to stay updated on important account activity and updates.",
+  },
+  "profile.darkModeDesc": {
+    "pt-BR":
+      "Mude para um tema mais escuro que seja mais agradável aos seus olhos.",
+    "en-US": "Switch to a darker theme that's easier on your eyes.",
+  },
+  "profile.wallet": {
+    "pt-BR": "Carteira",
+    "en-US": "Wallet",
+  },
+  "profile.walletStatement": {
+    "pt-BR": "Extrato da carteira",
+    "en-US": "Wallet Statement",
+  },
+  "profile.walletStatementDesc": {
+    "pt-BR":
+      "Mude para um tema mais escuro que seja mais agradável aos seus olhos.",
+    "en-US": "View a summary of your recent transactions and balances.",
+  },
+  "profile.paymentMethods": {
+    "pt-BR": "Métodos de pagamento",
+    "en-US": "Payment Methods",
+  },
+  "profile.paymentMethodsDesc": {
+    "pt-BR":
+      "Gerencie suas opções de pagamento salvas para uma finalização de compra rápida e fácil.",
+    "en-US": "Manage your saved payment options for quick and easy checkout.",
+  },
+  "profile.support": {
+    "pt-BR": "Apoiar",
+    "en-US": "Support",
+  },
+  "profile.termsDesc": {
+    "pt-BR": "Leia as regras e condições para usar nosso serviço.",
+    "en-US": "Read the rules and conditions for using our service.",
+  },
+  "profile.help": {
+    "pt-BR": "Ajuda",
+    "en-US": "Help",
+  },
+  "profile.helpDesc": {
+    "pt-BR": "Obtenha suporte e respostas para perguntas comuns.",
+    "en-US": "Get support and answers to common questions.",
+  },
 
   // Botões comuns
   "common.back": {
@@ -440,40 +589,6 @@ const translations: Translations = {
     "en-US": "Loading...",
   },
 
-  // Autenticação - Adicionais
-  "auth.login.loading": {
-    "pt-BR": "Entrando...",
-    "en-US": "Signing in...",
-  },
-  "auth.reset.loading": {
-    "pt-BR": "Enviando...",
-    "en-US": "Sending...",
-  },
-  "auth.reset.new.loading": {
-    "pt-BR": "Alterando...",
-    "en-US": "Changing...",
-  },
-  "auth.error.invalidToken": {
-    "pt-BR": "Token inválido ou expirado",
-    "en-US": "Invalid or expired token",
-  },
-  "auth.reset.backToReset": {
-    "pt-BR": "Voltar para recuperação",
-    "en-US": "Back to reset",
-  },
-  "auth.register.changeImage": {
-    "pt-BR": "Alterar imagem",
-    "en-US": "Change image",
-  },
-  "auth.register.uploadImage": {
-    "pt-BR": "Adicionar imagem",
-    "en-US": "Add image",
-  },
-  "auth.register.selectCountry": {
-    "pt-BR": "Selecione o país",
-    "en-US": "Select country",
-  },
-
   // Adicionar as traduções de autenticação
   ...authTranslations,
 
@@ -487,7 +602,8 @@ const translations: Translations = {
     "en-US": "Editing Collection",
   },
   "collections.edit.description": {
-    "pt-BR": "Atualize as informações da sua coleta. Todos os campos são obrigatórios.",
+    "pt-BR":
+      "Atualize as informações da sua coleta. Todos os campos são obrigatórios.",
     "en-US": "Update your collection information. All fields are required.",
   },
   "collections.edit.update": {
@@ -529,8 +645,10 @@ const translations: Translations = {
     "en-US": "Please provide the reason for cancellation...",
   },
   "collections.cancel.warning": {
-    "pt-BR": "⚠️ Esta ação não pode ser desfeita. Você poderá agendar uma nova coleta a qualquer momento.",
-    "en-US": "⚠️ This action cannot be undone. You can schedule a new collection at any time.",
+    "pt-BR":
+      "⚠️ Esta ação não pode ser desfeita. Você poderá agendar uma nova coleta a qualquer momento.",
+    "en-US":
+      "⚠️ This action cannot be undone. You can schedule a new collection at any time.",
   },
   "collections.cancel.keep": {
     "pt-BR": "Manter Coleta",
@@ -592,48 +710,54 @@ const translations: Translations = {
     "pt-BR": "O coletor será notificado sobre as mudanças",
     "en-US": "The collector will be notified about the changes",
   },
-}
+};
 
 type LanguageContextType = {
-  language: Language
-  setLanguage: (language: Language) => void
-  t: (key: string) => string
-}
+  language: Language;
+  setLanguage: (language: Language) => void;
+  t: (key: string) => string;
+};
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("pt-BR")
+  const [language, setLanguage] = useState<Language>("pt-BR");
 
   // Carregar idioma do localStorage quando disponível
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language") as Language
+    const savedLanguage = localStorage.getItem("language") as Language;
     if (savedLanguage) {
-      setLanguage(savedLanguage)
+      setLanguage(savedLanguage);
     }
-  }, [])
+  }, []);
 
   // Salvar idioma no localStorage quando mudar
   useEffect(() => {
-    localStorage.setItem("language", language)
-  }, [language])
+    localStorage.setItem("language", language);
+  }, [language]);
 
   // Função para traduzir textos
   const t = (key: string): string => {
     if (!translations[key]) {
-      console.warn(`Translation key not found: ${key}`)
-      return key
+      console.warn(`Translation key not found: ${key}`);
+      return key;
     }
-    return translations[key][language] || key
-  }
+    return translations[key][language] || key;
+  };
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext)
+  const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider")
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
-  return context
+  return context;
 }

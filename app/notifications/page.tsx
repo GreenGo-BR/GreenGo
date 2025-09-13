@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { NotificationCard } from "@/components/notification-card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bell, Check } from "lucide-react"
-import Navigation from "@/components/navigation"
-import { useLanguage } from "@/contexts/language-context"
-import { useScrollToTop } from "@/hooks/use-scroll-to-top"
+import { useState } from "react";
+import { NotificationCard } from "@/components/notification-card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bell, Check } from "lucide-react";
+import Navigation from "@/components/navigation";
+import { useLanguage } from "@/contexts/language-context";
+import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 
 export default function NotificationsPage() {
-  const { t, language } = useLanguage()
-  const [activeTab, setActiveTab] = useState("all")
-  useScrollToTop()
+  const { t, language } = useLanguage();
+  const [activeTab, setActiveTab] = useState("all");
+  useScrollToTop();
 
   // Dados simulados baseados no idioma
   const initialNotifications = [
@@ -30,7 +30,8 @@ export default function NotificationsPage() {
     {
       id: "not2",
       type: "system" as const,
-      title: language === "pt-BR" ? "Bem-vindo ao GreenGo!" : "Welcome to GreenGo!",
+      title:
+        language === "pt-BR" ? "Bem-vindo ao GreenGo!" : "Welcome to GreenGo!",
       message:
         language === "pt-BR"
           ? "Obrigado por se juntar à nossa comunidade de reciclagem."
@@ -52,7 +53,8 @@ export default function NotificationsPage() {
     {
       id: "not4",
       type: "alert" as const,
-      title: language === "pt-BR" ? "Lembrete de coleta" : "Collection reminder",
+      title:
+        language === "pt-BR" ? "Lembrete de coleta" : "Collection reminder",
       message:
         language === "pt-BR"
           ? "Sua coleta está agendada para amanhã entre 14:00 e 16:00."
@@ -71,52 +73,72 @@ export default function NotificationsPage() {
       date: new Date(2024, 4, 15, 11, 20),
       read: true,
     },
-  ]
+  ];
 
-  const [notifications, setNotifications] = useState(initialNotifications)
+  const [notifications, setNotifications] = useState(initialNotifications);
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = (id: string) => {
-    setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }
+    setNotifications(
+      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })))
-  }
+    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  };
 
   const filteredNotifications = notifications.filter((n) => {
-    if (activeTab === "all") return true
-    if (activeTab === "unread") return !n.read
-    return n.type === activeTab
-  })
+    if (activeTab === "all") return true;
+    if (activeTab === "unread") return !n.read;
+    return n.type === activeTab;
+  });
 
   return (
     <div className="min-h-screen pb-20">
-      <main className="pb-20 relative min-h-screen">
-        <div className="main-content p-4">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold page-title">{t("notifications.title")}</h1>
-            {unreadCount > 0 && (
-              <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} className="text-xs bg-transparent">
-                <Check size={14} className="mr-1" />
-                {t("notifications.markAllRead")}
-              </Button>
-            )}
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              {t("notifications.title")}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              {t("notifications.subtitle")}
+            </p>
           </div>
+          <Button
+            onClick={handleMarkAllAsRead}
+            className="bg-[#40A578] hover:bg-[#348c65] text-white shadow-lg"
+          >
+            <Check className="h-4 w-4 mr-2" />
+            {t("notifications.markAllRead")}
+          </Button>
+        </div>
 
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <div>
+          <Tabs
+            defaultValue="all"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="mb-6"
+          >
             <TabsList className="grid grid-cols-4 mb-4">
               <TabsTrigger value="all" className="text-xs">
                 {t("notifications.all")}
                 {notifications.length > 0 && (
-                  <span className="ml-1 text-xs bg-muted rounded-full px-1.5 py-0.5">{notifications.length}</span>
+                  <span className="ml-1 text-xs bg-muted rounded-full px-1.5 py-0.5">
+                    {notifications.length}
+                  </span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="unread" className="text-xs">
                 {t("notifications.unread")}
                 {unreadCount > 0 && (
-                  <span className="ml-1 text-xs bg-primary text-white rounded-full px-1.5 py-0.5">{unreadCount}</span>
+                  <span className="ml-1 text-xs bg-primary text-white rounded-full px-1.5 py-0.5">
+                    {unreadCount}
+                  </span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="collection" className="text-xs">
@@ -130,7 +152,11 @@ export default function NotificationsPage() {
             <TabsContent value={activeTab}>
               {filteredNotifications.length > 0 ? (
                 filteredNotifications.map((notification) => (
-                  <NotificationCard key={notification.id} {...notification} onMarkAsRead={handleMarkAsRead} />
+                  <NotificationCard
+                    key={notification.id}
+                    {...notification}
+                    onMarkAsRead={handleMarkAsRead}
+                  />
                 ))
               ) : (
                 <div className="text-center py-12">
@@ -138,7 +164,9 @@ export default function NotificationsPage() {
                     <Bell size={24} className="text-muted-foreground" />
                   </div>
                   <h3 className="text-lg font-medium mb-1">
-                    {language === "pt-BR" ? "Nenhuma notificação" : "No notifications"}
+                    {language === "pt-BR"
+                      ? "Nenhuma notificação"
+                      : "No notifications"}
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {activeTab === "all"
@@ -146,28 +174,32 @@ export default function NotificationsPage() {
                         ? "Você não tem notificações no momento."
                         : "You don't have any notifications at the moment."
                       : activeTab === "unread"
-                        ? language === "pt-BR"
-                          ? "Você não tem notificações não lidas."
-                          : "You don't have any unread notifications."
-                        : language === "pt-BR"
-                          ? `Você não tem notificações de ${
-                              activeTab === "collection"
-                                ? "coletas"
-                                : activeTab === "payment"
-                                  ? "pagamentos"
-                                  : "sistema"
-                            }.`
-                          : `You don't have any ${
-                              activeTab === "collection" ? "collection" : activeTab === "payment" ? "payment" : "system"
-                            } notifications.`}
+                      ? language === "pt-BR"
+                        ? "Você não tem notificações não lidas."
+                        : "You don't have any unread notifications."
+                      : language === "pt-BR"
+                      ? `Você não tem notificações de ${
+                          activeTab === "collection"
+                            ? "coletas"
+                            : activeTab === "payment"
+                            ? "pagamentos"
+                            : "sistema"
+                        }.`
+                      : `You don't have any ${
+                          activeTab === "collection"
+                            ? "collection"
+                            : activeTab === "payment"
+                            ? "payment"
+                            : "system"
+                        } notifications.`}
                   </p>
                 </div>
               )}
             </TabsContent>
           </Tabs>
         </div>
-      </main>
+      </div>
       <Navigation />
     </div>
-  )
+  );
 }
