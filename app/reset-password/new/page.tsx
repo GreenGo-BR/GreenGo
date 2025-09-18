@@ -14,25 +14,15 @@ import {
   type NewPasswordFormValues,
   newPasswordSchema,
 } from "@/lib/validators/auth";
-import { api } from "@/lib/api";
-import { jwtDecode } from "jwt-decode";
-
-function isTokenExpired(token: string) {
-  try {
-    const decoded: any = jwtDecode(token);
-    if (!decoded.exp) return true;
-
-    return decoded.exp < Date.now() / 1000;
-  } catch {
-    return true;
-  }
-}
+import { confirmPasswordReset } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function NewPasswordPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const oobCode = searchParams.get("oobCode");
+  const mode = searchParams.get("mode");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -43,7 +33,6 @@ export default function NewPasswordPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<NewPasswordFormValues>({
-    resolver: zodResolver(newPasswordSchema),
     defaultValues: {
       password: "",
       confirmPassword: "",
@@ -56,30 +45,29 @@ export default function NewPasswordPage() {
     setIsLoading(true);
 
     try {
-      if (!token) throw new Error("Reset token is missing. Please try again.");
+      if (!oobCode || mode !== "resetPassword") {
+        throw new Error(
+          "Invalid or missing reset link. Please request a new one."
+        );
+      }
+      await confirmPasswordReset(auth, oobCode as string, data.password);
 
-      const payload = {
-        token: token,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-      };
-
-      const res = await api().post("reset_password/new", payload);
-
-      setSuccess(t("auth.success.passwordReset"));
+      setSuccess("Password reset successful!");
 
       setTimeout(() => {
         router.push("/login");
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("auth.error.generic"));
+      setError(
+        String(err instanceof Error ? err.message : t("auth.error.generic"))
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   // If no token is provided, show an error
-  if (!token) {
+  if (!oobCode) {
     return (
       <AuthLayout
         title={t("auth.reset.new.title")}

@@ -127,14 +127,14 @@ const translations: Translations = {
   },
   "collections.details": {
     "pt-BR": "Ver detalhes",
-    "en-US": "View details",
+    "en-US": "View Details",
   },
   "collections.view": {
     "pt-BR": "Ver Coleções",
     "en-US": "View Collections",
   },
   "collections.empty": {
-    "pt-BR": "Nenhuma coleção encontrada.",
+    "pt-BR": "Nenhuma coleção encontraDa.",
     "en-US": "No collections found.",
   },
   "collections.recent": {
@@ -176,6 +176,10 @@ const translations: Translations = {
   "collections.cans": {
     "pt-BR": "latinhas",
     "en-US": "cans",
+  },
+  "collections.nocans": {
+    "pt-BR": "Número de latinhas",
+    "en-US": "Number of cans",
   },
   "collections.collection": {
     "pt-BR": "Coleta",
@@ -220,6 +224,34 @@ const translations: Translations = {
   "collections.cancel": {
     "pt-BR": "Cancelar",
     "en-US": "Cancel",
+  },
+  "collections.rating": {
+    "pt-BR": "Avaliação",
+    "en-US": "Rating",
+  },
+  "collections.view_receipt": {
+    "pt-BR": "Ver comprovante",
+    "en-US": "View Receipt",
+  },
+  "collections.payments_collections": {
+    "pt-BR": "O pagamento será processado após a conclusão da coleta",
+    "en-US": "Payment will be processed after collection completion",
+  },
+  "collections.no_collector_assigned": {
+    "pt-BR": "Coletor ainda não designado",
+    "en-US": "Collector not yet assigned",
+  },
+  "collections.amount": {
+    "pt-BR": "Valor",
+    "en-US": "Amount",
+  },
+  "collections.r": {
+    "pt-BR": "R$",
+    "en-US": "$",
+  },
+  "collections.method": {
+    "pt-BR": "Método",
+    "en-US": "Method",
   },
 
   // Agendamento
@@ -384,6 +416,18 @@ const translations: Translations = {
   "profile.address": {
     "pt-BR": "Endereço",
     "en-US": "Address",
+  },
+  "profile.phoneNumber": {
+    "pt-BR": "Número de telefone",
+    "en-US": "Phone number",
+  },
+  "profile.phoneotp": {
+    "pt-BR": "Número de telefone OTP",
+    "en-US": "OTP phone number",
+  },
+  "profile.noPhone": {
+    "pt-BR": "Nenhum número de telefone fornecido",
+    "en-US": "No phone number provided",
   },
   "profile.recentCollections": {
     "pt-BR": "Coletas Recentes",
@@ -736,6 +780,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Salvar idioma no localStorage quando mudar
   useEffect(() => {
     localStorage.setItem("language", language);
+    document.documentElement.lang = language;
   }, [language]);
 
   // Função para traduzir textos

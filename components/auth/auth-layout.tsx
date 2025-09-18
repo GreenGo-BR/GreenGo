@@ -16,9 +16,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#EEFDF3]">
-      {/* <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 hidden md:block">
         <LanguageToggle />
-      </div> */}
+      </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md">
@@ -34,8 +34,10 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                 />
               </div>
             </div>
-            <h1 className="text-2xl font-bold mb-2">{title}</h1>
-            {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+            <div>
+              <h2 className="text-2xl font-bold mb-2">{title}</h2>
+              {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+            </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 md:p-8">

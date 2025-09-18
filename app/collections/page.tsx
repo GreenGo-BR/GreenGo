@@ -52,14 +52,13 @@ function CollectionsPage({ token }: ColPageProps) {
       const fetchedList = res.data.collections;
 
       const normalized = fetchedList.map((fetched: any) => ({
-        id: fetched.ID,
-        date: fetched.CollectionDate,
-        time: fetched.CollectionTime,
-        address: fetched.PickupAddress,
-        city: fetched.City,
-        status: fetched.Status,
-        cans: fetched.NumberOfItems,
-        value: fetched.Amount,
+        id: fetched.id,
+        date: fetched.collection_date,
+        time: fetched.collection_time,
+        address: fetched.pickup_address,
+        status: fetched.status,
+        cans: fetched.number_items,
+        value: fetched.amount,
       }));
       setCollections(normalized);
     } catch (err) {
@@ -108,7 +107,6 @@ function CollectionsPage({ token }: ColPageProps) {
   return (
     <div className="min-h-screen pb-20">
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4 md:gap-0">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">

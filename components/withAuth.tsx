@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -55,6 +55,55 @@ export function withAuth<P>(
     if (!token || !userId) return null;
 
     return <WrappedComponent {...props} token={token} userId={userId} />;
+  };
+
+  return AuthenticatedComponent;
+}
+ */
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { ComponentType } from "react";
+import { auth } from "@/lib/firebase";
+
+export function withAuth<P>(
+  WrappedComponent: ComponentType<P & { token: string; uid: string }>
+) {
+  const AuthenticatedComponent = (props: P) => {
+    const router = useRouter();
+    const [token, setToken] = useState<string | null>(null);
+    const [uid, setUid] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          router.replace("/login");
+          return;
+        }
+
+        try {
+          const idToken = await user.getIdToken();
+          setToken(idToken);
+          setUid(user.uid);
+          localStorage.setItem("authToken", idToken);
+        } catch (err) {
+          console.error("Error getting Firebase token:", err);
+          router.replace("/login");
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      return () => unsubscribe();
+    }, [router]);
+
+    if (loading) return <div>Loading...</div>;
+    if (!token || !uid) return null;
+
+    return <WrappedComponent {...props} token={token} uid={uid} />;
   };
 
   return AuthenticatedComponent;

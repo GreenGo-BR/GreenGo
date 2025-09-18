@@ -1,17 +1,22 @@
+"use client";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
-export function useAuthRedirect() {
+export function useAuthRedirect(redirectIfAuthenticated = true) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && redirectIfAuthenticated) {
+        router.replace("/home");
+      } else if (!user && !redirectIfAuthenticated) {
+        router.replace("/login");
+      }
+    });
 
-    // If token exists and user is on login page, redirect to home
-    if (token) {
-      router.replace("/home");
-    } else {
-      router.replace("/login");
-    }
-  }, [router]);
+    return () => unsubscribe();
+  }, [router, redirectIfAuthenticated]);
 }

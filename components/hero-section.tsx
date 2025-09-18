@@ -1,20 +1,18 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { useLanguage } from "@/contexts/language-context"
-import { HeroFloatingCans } from "@/components/hero-floating-cans"
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useLanguage } from "@/contexts/language-context";
+import { HeroFloatingCans } from "@/components/hero-floating-cans";
 
 export function HeroSection() {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   return (
     <div className="relative overflow-hidden pt-8 pb-12 px-4 text-center min-h-[400px]">
-      {/* Latinhas flutuantes com distribuição otimizada */}
       <HeroFloatingCans count={6} />
 
-      {/* Conteúdo principal com z-index alto */}
       <div className="hero-content relative z-20">
         <div className="flex justify-center mb-4">
           <div className="h-16 relative logo-image">
@@ -46,5 +44,5 @@ export function HeroSection() {
         </Link>
       </div>
     </div>
-  )
+  );
 }

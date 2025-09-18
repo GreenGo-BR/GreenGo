@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
 import { EditPersonalInfo } from "@/components/profile/edit-personal-info";
+import { EditPhoneInfo } from "@/components/profile/edit-phone-info";
 import { ChangePassword } from "@/components/profile/change-password";
 import { TwoFactorAuth } from "@/components/profile/two-factor-auth";
 import { TermsModal } from "@/components/profile/terms-modal";
@@ -30,6 +31,8 @@ import {
   TicketCheck,
   Star,
   Gift,
+  Phone,
+  User,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useTheme } from "next-themes";
@@ -39,13 +42,13 @@ import { api } from "@/lib/api";
 
 type ProfPageProps = {
   token: string;
-  userId: number;
 };
 
-function ProfilePage({ token, userId }: ProfPageProps) {
+function ProfilePage({ token }: ProfPageProps) {
   const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [isEditingPhoneInfo, setIsEditingPhoneInfo] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isTwoFactorOpen, setIsTwoFactorOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -57,18 +60,17 @@ function ProfilePage({ token, userId }: ProfPageProps) {
   useEffect(() => {
     const load = async () => {
       try {
-        await fetchProfile(token, userId);
+        await fetchProfile(token);
       } catch (err) {
         console.error("Failed to load collections:", err);
       }
     };
     load();
-  }, [token, userId]);
+  }, [token]);
 
-  const fetchProfile = async (token: string, userId: number) => {
+  const fetchProfile = async (token: string) => {
     try {
       const res = await api().get("/profile", {
-        params: { userId },
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -87,6 +89,7 @@ function ProfilePage({ token, userId }: ProfPageProps) {
     cpf: "",
     country: "",
     avatar: "/placeholder.svg?height=80&width=80",
+    phone: "",
   });
 
   const handleThemeChange = (checked: boolean) => {
@@ -99,7 +102,6 @@ function ProfilePage({ token, userId }: ProfPageProps) {
       const newLang = language === "pt-BR" ? "en-US" : "pt-BR";
 
       let payload = {
-        id: userId,
         lang: newLang,
       };
 
@@ -222,7 +224,8 @@ function ProfilePage({ token, userId }: ProfPageProps) {
           {/* Personal Information */}
           <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <User className="h-5 w-5 text-[#40A578]" />
                 {t("profile.personalInfo")}
               </h3>
               {!isEditingPersonalInfo && (
@@ -241,7 +244,6 @@ function ProfilePage({ token, userId }: ProfPageProps) {
               <EditPersonalInfo
                 initialData={userData}
                 token={token}
-                userId={userId}
                 onSave={handlePersonalInfoUpdate}
                 onCancel={() => setIsEditingPersonalInfo(false)}
               />
@@ -277,6 +279,45 @@ function ProfilePage({ token, userId }: ProfPageProps) {
                   </label>
                   <p className="text-gray-900 dark:text-white">
                     {getCountryName(userData.country)}
+                  </p>
+                </div>
+              </div>
+            )}
+          </GlassCard>
+
+          {/* phone number */}
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Phone className="h-5 w-5 text-[#40A578]" />
+                {t("profile.phoneNumber")}
+              </h3>
+              {!isEditingPhoneInfo && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditingPhoneInfo(true)}
+                  className="text-[#40A578] hover:text-[#348c65] hover:bg-green-50 dark:hover:bg-green-900/20"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {isEditingPhoneInfo ? (
+              <EditPhoneInfo
+                initialData={userData}
+                token={token}
+                onSave={handlePersonalInfoUpdate}
+                onCancel={() => setIsEditingPhoneInfo(false)}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {t("profile.phone")}
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {userData.phone || t("profile.noPhone")}
                   </p>
                 </div>
               </div>
@@ -386,11 +427,12 @@ function ProfilePage({ token, userId }: ProfPageProps) {
                     </p>
                   </div>
                 </div>
+
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLanguageChange}
-                  className="border-[#40A578] text-[#40A578] hover:bg-[#40A578] hover:text-white bg-transparent"
+                  className="border-[#40A578] text-[#40A578] hover:bg-[#40A578] hover:text-white"
                 >
                   {t("profile.change")}
                 </Button>
@@ -507,7 +549,6 @@ function ProfilePage({ token, userId }: ProfPageProps) {
       {isChangingPassword && (
         <ChangePassword
           token={token}
-          userId={userId}
           onBack={() => setIsChangingPassword(false)}
           onClose={() => setIsChangingPassword(false)}
         />
@@ -516,7 +557,6 @@ function ProfilePage({ token, userId }: ProfPageProps) {
       {isTwoFactorOpen && (
         <TwoFactorAuth
           token={token}
-          userId={userId}
           onBack={() => setIsTwoFactorOpen(false)}
           onClose={() => setIsTwoFactorOpen(false)}
         />
@@ -533,7 +573,6 @@ function ProfilePage({ token, userId }: ProfPageProps) {
       {isImageUploadOpen && (
         <ProfileImageUploadModal
           token={token}
-          userId={userId}
           onClose={() => setIsImageUploadOpen(false)}
           onUpload={handleImageUpload}
         />

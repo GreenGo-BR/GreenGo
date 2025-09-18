@@ -6,7 +6,7 @@ import base64
 from app.models.db import get_db_connection_string
 from passlib.hash import bcrypt
 
-def get_profile(user_id):
+def get_profile(uid):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
@@ -15,7 +15,7 @@ def get_profile(user_id):
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor() 
 
-        cursor.execute("SELECT Name, Email, CPF, Country, ProfileImage FROM Users WHERE UserID = ?", user_id)
+        cursor.execute("SELECT name, email, cpf, country, avatar, phone_number FROM Users WHERE firebase_uid = ?", uid)
         profile = cursor.fetchone()
                     
         cnxn.commit()
@@ -23,11 +23,12 @@ def get_profile(user_id):
         return {
             "success": True, 
             "profile": {
-                "name" : profile.Name,
-                "email" : profile.Email,
-                "cpf" : profile.CPF,
-                "country" : profile.Country,
-                "avatar" : profile.ProfileImage
+                "name" : profile.name,
+                "email" : profile.email,
+                "phone" : profile.phone_number,
+                "cpf" : profile.cpf,
+                "country" : profile.country,
+                "avatar" : profile.avatar
             }
         }
        
@@ -76,7 +77,7 @@ def edit_profile(data):
         if 'cnxn' in locals() and cnxn:
             cnxn.close()
             
-def upload_profile(user_id, avatar_url):
+def upload_profile(uid, avatar_url):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."} 
@@ -87,9 +88,9 @@ def upload_profile(user_id, avatar_url):
 
         cursor.execute("""
             UPDATE Users
-            SET ProfileImage = ?
-            WHERE UserID = ?
-        """, (avatar_url, user_id))
+            SET avatar = ?
+            WHERE firebase_uid = ?
+        """, (avatar_url, uid))
 
         cnxn.commit()
 
@@ -177,7 +178,7 @@ def language_profile(data):
         if 'cnxn' in locals() and cnxn:
             cnxn.close()
 
-def two_factor_profile(data):
+def two_factor_profile(data, uid):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
@@ -185,22 +186,21 @@ def two_factor_profile(data):
     try:
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor() 
-
-        user_id = data.get("userId") 
+ 
         action = data.get("action") 
         
         if action == "generate":
 
-            user = get_user_by_id(cursor, user_id)
+            user = get_user_by_id(cursor, uid)
             secret = user.get("twofa_secret")
 
             if not secret:
                 secret = pyotp.random_base32()
-                update_user_2fa_secret(cursor, user_id, secret)
+                update_user_2fa_secret(cursor, uid, secret)
                 cnxn.commit() 
 
             totp = pyotp.TOTP(secret)
-            otpauth_url = totp.provisioning_uri(name=f"user{user_id}", issuer_name="GreenGo")
+            otpauth_url = totp.provisioning_uri(issuer_name="GreenGo")
 
             qr = qrcode.make(otpauth_url)
             buffered = io.BytesIO()
@@ -215,7 +215,7 @@ def two_factor_profile(data):
             } 
         elif action == "verify":
             code = data.get("code")
-            user = get_user_by_id(cursor, user_id)
+            user = get_user_by_id(cursor, uid)
             
             secret = user.get("twofa_secret")
 
@@ -224,7 +224,7 @@ def two_factor_profile(data):
             totp = pyotp.TOTP(secret)  
            
             if totp.verify(code, valid_window=1):
-                enable_user_2fa(cursor, user_id)
+                enable_user_2fa(cursor, uid)
                 cnxn.commit()
                 return {"success": True, "message": "2FA enabled"}
             else:
@@ -242,32 +242,30 @@ def two_factor_profile(data):
         if 'cnxn' in locals() and cnxn:
             cnxn.close()
 
-def update_user_2fa_secret(cursor, user_id, secret):
-    cursor.execute("UPDATE Users SET twofa_secret = ? WHERE UserID = ?", (secret, user_id))
+def update_user_2fa_secret(cursor, uid, secret):
+    cursor.execute("UPDATE Users SET twofa_secret = ? WHERE firebase_uid = ?", (secret, uid))
 
-def enable_user_2fa(cursor, user_id): 
-    cursor.execute("UPDATE Users SET twofa_enabled = 1 WHERE UserID = ?", (user_id,))
+def enable_user_2fa(cursor, uid): 
+    cursor.execute("UPDATE Users SET twofa_enabled = 1 WHERE firebase_uid = ?", (uid,))
 
-def get_user_by_id(cursor, user_id):
-    cursor.execute("SELECT twofa_secret, twofa_enabled FROM Users WHERE UserID = ?", (user_id,))
+def get_user_by_id(cursor, uid):
+    cursor.execute("SELECT twofa_secret, twofa_enabled FROM Users WHERE firebase_uid = ?", (uid,))
     row = cursor.fetchone()
     if row:
         columns = [column[0] for column in cursor.description]
         return dict(zip(columns, row))
     return None
 
-def twofa_status_profile(data):
+def twofa_status_profile(uid):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
 
     try:
         cnxn = pyodbc.connect(conn_str)
-        cursor = cnxn.cursor() 
+        cursor = cnxn.cursor()  
 
-        user_id = data.get("userId")
-
-        user = get_user_by_id(cursor, user_id)
+        user = get_user_by_id(cursor, uid)
         
         twoenabled = user.get('twofa_enabled') 
  

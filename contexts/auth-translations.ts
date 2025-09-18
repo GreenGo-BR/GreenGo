@@ -1,7 +1,7 @@
 export const authTranslations = {
   "auth.login.title": {
     "pt-BR": "Entrar na sua conta",
-    "en-US": "Sign in to your account",
+    "en-US": "Log in to your account",
   },
   "auth.login.subtitle": {
     "pt-BR": "Bem-vindo de volta ao GreenGo",
@@ -94,6 +94,14 @@ export const authTranslations = {
   "auth.register.selectCountry": {
     "pt-BR": "Selecione o país",
     "en-US": "Select country",
+  },
+  "auth.register.phone": {
+    "pt-BR": "Número de telefone",
+    "en-US": "Phone number",
+  },
+  "auth.validation.phone": {
+    "pt-BR": "Número de telefone inválido",
+    "en-US": "Invalid phone number",
   },
   "auth.reset.title": {
     "pt-BR": "Recuperar senha",
@@ -220,5 +228,25 @@ export const authTranslations = {
   "auth.login.whatsapp": {
     "en-US": "Continue with WhatsApp",
     "pt-BR": "Entrar com WhatsApp",
+  },
+  "auth.login.phone": {
+    "en-US": "Continue with Phone Number",
+    "pt-BR": "Entrar com número de telefone",
+  },
+  "auth.login.emailLogin": {
+    "en-US": "Continue with Email",
+    "pt-BR": "Entrar com email",
+  },
+  "auth.login.sendOtp": {
+    "en-US": "Send OTP",
+    "pt-BR": "Enviar código",
+  },
+  "auth.validation.Invalid": {
+    "en-US": "Invalid email",
+    "pt-BR": "Email inválido",
+  },
+  "auth.validation.String": {
+    "en-US": "Must be a string",
+    "pt-BR": "Deve ser uma string",
   },
 };

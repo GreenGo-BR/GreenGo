@@ -1,7 +1,7 @@
 import pyodbc 
 from app.models.db import get_db_connection_string
 
-def schedule_collections(data):
+def schedule_collections(data, userid):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
@@ -9,8 +9,7 @@ def schedule_collections(data):
     try:
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor()
-
-        user_id = data.get("userid")
+ 
         id = int(data.get("id", 0))
         date = data.get("date")
         time_slot = data.get("timeSlot")
@@ -19,29 +18,22 @@ def schedule_collections(data):
         notes = data.get("notes")
         weight = round(int(cans_count) / 60, 2)
         status = "scheduled" 
-        if id == 0:  
-            delete_query = """
-            DELETE FROM Collections
-            WHERE UserID = ? AND PickupAddress = ? AND CAST(CollectionDate AS DATE) = CAST(? AS DATE)
-            """
-            cursor.execute(delete_query, (user_id, address, date))
-
-            # 📝 INSERT new collection
+        if id == 0: 
             insert_query = """
-            INSERT INTO Collections (UserID, CollectionDate, CollectionTime, PickupAddress, NumberOfItems, Weight, Status, Notes)
+            INSERT INTO Collections (UserID, collection_date, collection_time, pickup_address, number_items, weight, status, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
-            cursor.execute(insert_query, (user_id, date, time_slot, address, cans_count, weight, status, notes))
+            cursor.execute(insert_query, (userid, date, time_slot, address, cans_count, weight, status, notes))
             
         else: 
     
             update_query = """
                 UPDATE Collections
-                SET UserID = ?, CollectionDate = ?, CollectionTime = ?, PickupAddress = ?, 
-                    NumberOfItems = ?, Weight = ?, Status = ?, Notes = ?
+                SET UserID = ?, collection_date = ?, collection_time = ?, pickup_address = ?, 
+                    number_items = ?, weight = ?, status = ?, notes = ?
                 WHERE ColID = ?
             """
-            cursor.execute(update_query, (user_id, date, time_slot, address, cans_count, weight, status, notes, id))
+            cursor.execute(update_query, (userid, date, time_slot, address, cans_count, weight, status, notes, id))
         
         cnxn.commit()
 

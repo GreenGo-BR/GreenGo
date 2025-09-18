@@ -6,5 +6,6 @@ export function api() {
     headers: {
       "Content-Type": undefined,
     },
+    withCredentials: false,
   });
 }

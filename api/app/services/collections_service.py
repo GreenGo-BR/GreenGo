@@ -1,7 +1,8 @@
 import pyodbc
 from app.models.db import get_db_connection_string
+from firebase_admin import auth
 
-def get_collections(userID):
+def get_collections(userid):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
@@ -10,7 +11,7 @@ def get_collections(userID):
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor() 
 
-        cursor.execute("SELECT 'col' + CAST(ColID AS VARCHAR) AS ID, UserID, CollectionDate, CollectionTime, PickupAddress, Amount, NumberOfItems, Weight, Notes, Status FROM Collections WHERE UserID = ?", userID)
+        cursor.execute("SELECT 'col' + CAST(ColID AS VARCHAR) AS id, UserID, collection_date, collection_time, pickup_address, amount, number_items, weight, notes, status FROM Collections WHERE UserID = ?", userid)
         collections = cursor.fetchall()
 
         if not collections:

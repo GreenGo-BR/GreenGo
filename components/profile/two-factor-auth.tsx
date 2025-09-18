@@ -11,12 +11,11 @@ import { api } from "@/lib/api";
 
 interface TwoFactorAuthProps {
   token: string;
-  userId: number;
   onBack: () => void;
   onClose: () => void;
 }
 
-export function TwoFactorAuth({ token, userId, onBack }: TwoFactorAuthProps) {
+export function TwoFactorAuth({ token, onBack }: TwoFactorAuthProps) {
   const { language } = useLanguage();
   const [isEnabled, setIsEnabled] = useState(false);
   const [step, setStep] = useState(1);
@@ -31,7 +30,6 @@ export function TwoFactorAuth({ token, userId, onBack }: TwoFactorAuthProps) {
     const fetch2FAStatus = async () => {
       try {
         const { data } = await api().get("/profile/twofa/status", {
-          params: { userId },
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -45,7 +43,7 @@ export function TwoFactorAuth({ token, userId, onBack }: TwoFactorAuthProps) {
     };
 
     fetch2FAStatus();
-  }, [userId, token]);
+  }, [token]);
 
   const handleEnable2FA = async () => {
     const isPT = language === "pt-BR";
@@ -54,7 +52,6 @@ export function TwoFactorAuth({ token, userId, onBack }: TwoFactorAuthProps) {
 
     try {
       const payload = {
-        userId: userId,
         action: "generate",
         code: "",
       };
@@ -96,7 +93,6 @@ export function TwoFactorAuth({ token, userId, onBack }: TwoFactorAuthProps) {
 
     try {
       const payload = {
-        userId: userId,
         action: "verify",
         code: verificationCode,
       };

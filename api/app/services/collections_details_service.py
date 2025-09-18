@@ -12,8 +12,8 @@ def get_collections_details(collection_id):
 
         query = """
         SELECT 
-            'col' + CAST(ColID AS VARCHAR) AS ID, UserID, CollectionDate, CollectionTime, PickupAddress,
-            NumberOfItems, Weight, Notes, Status
+            'col' + CAST(ColID AS VARCHAR) AS id, UserID, collection_date, collection_time, pickup_address,
+            number_items, weight, notes, status
         FROM Collections
         WHERE ColID = ? 
         """
@@ -28,14 +28,14 @@ def get_collections_details(collection_id):
         collection = dict(zip(columns, row))
 
         result = {
-            "ID": collection["ID"],
-            "CollectionDate": collection["CollectionDate"],
-            "CollectionTime": collection["CollectionTime"],
-            "PickupAddress": collection["PickupAddress"],
-            "Status": collection["Status"],
-            "Weight": collection["Weight"],
-            "NumberOfItems": collection["NumberOfItems"],
-            "Notes": collection["Notes"],
+            "id": collection["id"],
+            "collection_date": collection["collection_date"],
+            "collection_time": collection["collection_time"],
+            "pickup_address": collection["pickup_address"],
+            "status": collection["status"],
+            "weight": collection["weight"],
+            "number_items": collection["number_items"],
+            "notes": collection["notes"],
             # "Collector": {
             #     "name": collection["CollectorName"],
             #     "phone": collection["CollectorPhone"],
@@ -57,7 +57,7 @@ def get_collections_details(collection_id):
         if 'cnxn' in locals() and cnxn:
             cnxn.close() 
 
-def cancel_collection_by_id(coldet_id, cancel_reason):
+def cancel_collection_by_id(data):
     conn_str = get_db_connection_string()
     if not conn_str:
         return False
@@ -66,10 +66,13 @@ def cancel_collection_by_id(coldet_id, cancel_reason):
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor()
 
+        coldet_id = data.get("id")
+        cancel_reason = data.get("reason")
+
         cursor.execute("""
             UPDATE Collections
-            SET Status = ?, Reason = ?
-            WHERE ColID = ? AND Status IN ('scheduled', 'pending')
+            SET status = ?, reason = ?
+            WHERE ColID = ? AND status IN ('scheduled', 'pending')
         """, ("cancelled", cancel_reason, coldet_id))
 
         cnxn.commit() 
@@ -92,30 +95,3 @@ def cancel_collection_by_id(coldet_id, cancel_reason):
         if 'cnxn' in locals() and cnxn:
             cnxn.close()
 
-def reschedule_collection_by_id(collection_id, new_date, new_time):
-    conn_str = get_db_connection_string()
-    if not conn_str:
-        return False
-
-    try:
-        cnxn = pyodbc.connect(conn_str)
-        cursor = cnxn.cursor()
- 
-        cursor.execute("""
-            UPDATE Collections
-            SET CollectionDate = ?, CollectionTime = ?, Status = 'scheduled'
-            WHERE ID = ? AND Status IN ('scheduled', 'pending')
-        """, (new_date, new_time, collection_id))
-
-        cnxn.commit()
-        return cursor.rowcount > 0
-
-    except pyodbc.Error as ex:
-        print(f"Database error while rescheduling collection: {ex}")
-        return False
-    except Exception as e:
-        print(f"Unexpected error while rescheduling collection: {e}")
-        return False
-    finally:
-        if 'cnxn' in locals() and cnxn:
-            cnxn.close()

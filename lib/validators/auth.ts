@@ -1,17 +1,61 @@
-import { z } from "zod"
+import { z } from "zod";
 
-export const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-  rememberMe: z.boolean().optional(),
-})
+export const loginSchema = z
+  .object({
+    email: z.string().optional(),
+    password: z.string().optional(),
+    phone: z.string().optional(),
+    otp: z.string().optional(),
+    rememberMe: z.boolean().optional(),
+    isPhoneLogin: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isPhoneLogin) {
+      // Phone login: phone is required
+      if (!data.phone) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["phone"],
+          message: "Phone number is required",
+        });
+      }
+      // OTP is required only if confirmationResult exists
+      if (data.otp === "" && data.otp !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["otp"],
+          message: "OTP is required",
+        });
+      }
+    } else {
+      // Email login: email & password are required
+      if (!data.email) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["email"],
+          message: "Email is required",
+        });
+      }
+      if (!data.password) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["password"],
+          message: "Password is required",
+        });
+      }
+    }
+  });
 
-export type LoginFormValues = z.infer<typeof loginSchema>
+export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const registerSchema = z
   .object({
     name: z.string().min(1),
     email: z.string().email(),
+    phone: z
+      .string()
+      .regex(/^\+?[1-9]\d{7,14}$/, { message: "phone.invalid" })
+      .optional(),
     cpf: z.string().min(11).max(14),
     country: z.string().min(1),
     password: z
@@ -25,15 +69,15 @@ export const registerSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "password.match",
     path: ["confirmPassword"],
-  })
+  });
 
-export type RegisterFormValues = z.infer<typeof registerSchema>
+export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const resetPasswordSchema = z.object({
   email: z.string().email(),
-})
+});
 
-export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export const newPasswordSchema = z
   .object({
@@ -43,13 +87,14 @@ export const newPasswordSchema = z
       .regex(/[A-Z]/, { message: "password.uppercase" })
       .regex(/[0-9]/, { message: "password.number" }),
     confirmPassword: z.string(),
+    oldpassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "password.match",
     path: ["confirmPassword"],
-  })
+  });
 
-export type NewPasswordFormValues = z.infer<typeof newPasswordSchema>
+export type NewPasswordFormValues = z.infer<typeof newPasswordSchema>;
 
 // Personal info validation schema
 export const personalInfoSchema = z.object({
@@ -57,6 +102,14 @@ export const personalInfoSchema = z.object({
   email: z.string().email("Email inválido"),
   cpf: z.string().min(11, "CPF inválido").max(14),
   country: z.string().min(1, "País é obrigatório"),
-})
+});
 
-export type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>
+export type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
+
+// Phone info validation schema
+export const phoneInfoSchema = z.object({
+  phone: z.string().min(1, "Telefone é obrigatório"),
+  otp: z.string().min(1, "Código OTP é obrigatório"),
+});
+
+export type PhoneInfoFormValues = z.infer<typeof phoneInfoSchema>;

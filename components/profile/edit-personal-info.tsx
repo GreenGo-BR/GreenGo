@@ -28,7 +28,6 @@ interface EditPersonalInfoProps {
     country: string;
   };
   token: string;
-  userId: number;
   onSave: (data: PersonalInfoFormValues) => void;
   onCancel: () => void;
 }
@@ -44,7 +43,6 @@ const countries = [
 export function EditPersonalInfo({
   initialData,
   token,
-  userId,
   onSave,
   onCancel,
 }: EditPersonalInfoProps) {
@@ -84,7 +82,6 @@ export function EditPersonalInfo({
 
       try {
         let payload = {
-          id: userId,
           name: data.name,
           email: data.email,
           cpf: data.cpf,

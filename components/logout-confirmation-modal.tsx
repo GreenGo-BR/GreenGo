@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import {
   Dialog,
   DialogContent,
@@ -30,10 +32,9 @@ export function LogoutConfirmationModal({
 
   const handleConfirm = async () => {
     setIsLoading(true);
-    try {
-      await onConfirm();
-
-      localStorage.removeItem("authToken");
+    try { 
+      await signOut(auth);
+ 
       router.push("/login");
       onClose();
     } catch (error) {

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+// import { PhoneInput } from "@/components/ui/phoneinput";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,8 @@ import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { type RegisterFormValues, registerSchema } from "@/lib/validators/auth";
 import { api } from "@/lib/api";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 // Lista de países
 const countries = [
@@ -50,7 +53,7 @@ export default function RegisterPage() {
       email: "",
       cpf: "",
       country: "BR",
-      password: "",
+      // password: "",
       confirmPassword: "",
     },
   });
@@ -60,23 +63,30 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+      const user = userCredential.user;
+      const uid = user.uid;
+
       const formData = new FormData();
+      formData.append("firebase_uid", uid);
       formData.append("name", data.name);
       formData.append("email", data.email);
       formData.append("cpf", data.cpf);
       formData.append("country", data.country);
-      formData.append("password", data.password);
 
       if (profileImage && profileImage.length > 0) {
         formData.append("avatar", profileImage[0]);
       }
-      // Simulate API call
-      // await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const res = await api().post("register", formData);
-      console.log(res.data);
-      router.push("/login");
-      // Simulate success
+      if (res.data.success) {
+        console.log(res.data);
+        router.push("/login");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("auth.error.generic"));
     } finally {
@@ -159,6 +169,23 @@ export default function RegisterPage() {
             </p>
           )}
         </div>
+        {/* <div>
+          <label htmlFor="phone" className="block text-sm font-medium mb-1">
+            {t("auth.register.phone")}
+          </label>
+
+          <PhoneInput
+            id="phone"
+            placeholder="+1 555 123 4567"
+            {...register("phone", { required: t("auth.validation.phone") })}
+            className={errors.phone ? "border-red-300" : ""}
+            error={!!errors.phone}
+          />
+
+          {errors.phone && (
+            <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
+          )}
+        </div> */}
 
         <div>
           <label htmlFor="cpf" className="block text-sm font-medium mb-1">
@@ -194,7 +221,11 @@ export default function RegisterPage() {
           >
             <SelectTrigger
               id="country"
-              className={errors.country ? "border-red-300" : ""}
+              className={
+                errors.country
+                  ? "border-red-300"
+                  : "outline-none border-0 focus:ring-0 focus:outline-none w-full"
+              }
             >
               <SelectValue placeholder={t("auth.register.selectCountry")} />
             </SelectTrigger>

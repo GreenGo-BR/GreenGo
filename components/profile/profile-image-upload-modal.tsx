@@ -18,12 +18,10 @@ interface ProfileImageUploadModalProps {
   onClose: () => void;
   onUpload: (imageUrl: string) => void;
   token: string;
-  userId: number;
 }
 
 export function ProfileImageUploadModal({
   token,
-  userId,
   onClose,
   onUpload,
 }: ProfileImageUploadModalProps) {
@@ -104,13 +102,7 @@ export function ProfileImageUploadModal({
       }
 
       const formData = new FormData();
-      formData.append("id", String(userId));
       formData.append("avatar", selectedFile);
-
-      // Create a mock URL for the uploaded image
-      /*     const mockUploadedUrl = `/placeholder.svg?height=80&width=80&text=${encodeURIComponent(
-        selectedFile.name.slice(0, 2).toUpperCase()
-      )}`; */
 
       const res = await api().post("/profile/upload", formData, {
         headers: {

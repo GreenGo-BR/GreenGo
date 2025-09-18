@@ -14,20 +14,20 @@ import {
   type NewPasswordFormValues,
 } from "@/lib/validators/auth";
 import { api } from "@/lib/api";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 interface ChangePasswordProps {
   token: string;
-  userId: number;
   onBack: () => void;
   onClose: () => void;
 }
 
-export function ChangePassword({
-  token,
-  userId,
-  onBack,
-  onClose,
-}: ChangePasswordProps) {
+export function ChangePassword({ token, onBack }: ChangePasswordProps) {
   const { t, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -43,6 +43,7 @@ export function ChangePassword({
   } = useForm<NewPasswordFormValues>({
     resolver: zodResolver(newPasswordSchema),
     defaultValues: {
+      oldpassword: "",
       password: "",
       confirmPassword: "",
     },
@@ -53,8 +54,32 @@ export function ChangePassword({
     setMessage(null);
 
     try {
-      let payload = {
-        userId: userId,
+      const user = auth.currentUser;
+
+      if (!user || !user.email) {
+        throw new Error("No authenticated user found");
+      }
+
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        data.oldpassword
+      );
+      await reauthenticateWithCredential(user, credential);
+
+      await updatePassword(user, data.password);
+
+      setMessage({
+        type: "success",
+        text:
+          language === "pt-BR"
+            ? "Senha alterada com sucesso!"
+            : "Password changed successfully!",
+      });
+
+      setTimeout(() => {
+        onBack();
+      }, 2000);
+      /* let payload = {
         newpass: data.password,
         confirmpass: data.confirmPassword,
       };
@@ -78,15 +103,33 @@ export function ChangePassword({
         }, 2000);
       } else {
         throw new Error("Erro ao alterar senha");
+      } */
+    } catch (error: any) {
+      if (error.code === "auth/wrong-password") {
+        setMessage({
+          type: "error",
+          text:
+            language === "pt-BR"
+              ? "Senha atual incorreta."
+              : "Current password is incorrect.",
+        });
+      } else if (error.code === "auth/weak-password") {
+        setMessage({
+          type: "error",
+          text:
+            language === "pt-BR"
+              ? "A nova senha é muito fraca."
+              : "The new password is too weak.",
+        });
+      } else {
+        setMessage({
+          type: "error",
+          text:
+            language === "pt-BR"
+              ? "Erro ao alterar senha. Tente novamente."
+              : "Error changing password. Try again.",
+        });
       }
-    } catch (error) {
-      setMessage({
-        type: "error",
-        text:
-          language === "pt-BR"
-            ? "Erro ao alterar senha. Tente novamente."
-            : "Error changing password. Try again.",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -115,6 +158,26 @@ export function ChangePassword({
 
           <GlassCard>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  {language === "pt-BR" ? "Nova Senha" : "Old Password"}
+                </label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  {...register("oldpassword")}
+                  className={errors.oldpassword ? "border-red-300" : ""}
+                />
+                {errors.oldpassword && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {t(
+                      `auth.validation.oldpassword.${
+                        errors.oldpassword.message || "min"
+                      }`
+                    )}
+                  </p>
+                )}
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
                   {language === "pt-BR" ? "Nova Senha" : "New Password"}

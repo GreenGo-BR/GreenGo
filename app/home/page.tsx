@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { withAuth } from "@/components/withAuth";
 import { api } from "@/lib/api";
+import { auth } from "@/lib/firebase";
 
 type Collection = {
   id: string;
@@ -58,12 +59,12 @@ function HomePage({ token }: HomePageProps) {
       const fetchedList = res.data.collections;
 
       const normalized = fetchedList.map((fetched: any) => ({
-        id: fetched.ID,
-        date: fetched.CollectionDate,
-        time: fetched.CollectionTime,
-        address: fetched.PickupAddress,
-        status: fetched.Status,
-        estimatedWeight: fetched.Weight,
+        id: fetched.id,
+        date: fetched.collection_date,
+        time: fetched.collection_time,
+        address: fetched.pickup_address,
+        status: fetched.status,
+        estimatedWeight: fetched.weight,
       }));
 
       setCollections(normalized);

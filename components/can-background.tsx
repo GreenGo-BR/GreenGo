@@ -1,22 +1,25 @@
 interface CanBackgroundProps {
-  density?: "light" | "medium" | "dense"
-  className?: string
+  density?: "light" | "medium" | "dense";
+  className?: string;
 }
 
-export function CanBackground({ density = "medium", className = "" }: CanBackgroundProps) {
-  const canCount = density === "light" ? 3 : density === "medium" ? 5 : 7
+export function CanBackground({
+  density = "medium",
+  className = "",
+}: CanBackgroundProps) {
+  const canCount = density === "light" ? 3 : density === "medium" ? 5 : 7;
 
   const generateCanPositions = () => {
-    const positions = []
+    const positions = [];
 
     for (let i = 0; i < canCount; i++) {
-      const size = Math.random() * 40 + 30 // 30-70px
-      const rotation = Math.random() * 60 - 30 // -30 to 30 degrees
-      const animationDelay = Math.random() * 3 // 0-3s delay
+      const size = Math.random() * 40 + 30; // 30-70px
+      const rotation = Math.random() * 60 - 30; // -30 to 30 degrees
+      const animationDelay = Math.random() * 3; // 0-3s delay
 
       // Posições distribuídas
-      const top = Math.random() * 80 + 10 // 10-90%
-      const left = Math.random() * 80 + 10 // 10-90%
+      const top = Math.random() * 80 + 10; // 10-90%
+      const left = Math.random() * 80 + 10; // 10-90%
 
       positions.push({
         id: i,
@@ -25,13 +28,13 @@ export function CanBackground({ density = "medium", className = "" }: CanBackgro
         animationDelay,
         top,
         left,
-      })
+      });
     }
 
-    return positions
-  }
+    return positions;
+  };
 
-  const cans = generateCanPositions()
+  const cans = generateCanPositions();
 
   return (
     <div className={`can-background ${className}`}>
@@ -52,5 +55,5 @@ export function CanBackground({ density = "medium", className = "" }: CanBackgro
         />
       ))}
     </div>
-  )
+  );
 }

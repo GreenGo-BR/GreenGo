@@ -16,6 +16,8 @@ import {
   resetPasswordSchema,
 } from "@/lib/validators/auth";
 import { api } from "@/lib/api";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function ResetPasswordPage() {
   const { t } = useLanguage();
@@ -39,10 +41,12 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const res = api().post("reset_password", data);
+      await sendPasswordResetEmail(auth, data.email);
       router.push("/reset-password/confirm");
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("auth.error.generic"));
+      setError(
+        String(err instanceof Error ? err.message : t("auth.error.generic"))
+      );
     } finally {
       setIsLoading(false);
     }

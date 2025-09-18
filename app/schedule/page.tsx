@@ -44,9 +44,8 @@ const timeSlots = [
 
 type SchedPageProps = {
   token: string;
-  userId: number;
 };
-function SchedulePage({ token, userId }: SchedPageProps) {
+function SchedulePage({ token }: SchedPageProps) {
   const { t, language } = useLanguage();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<string>("");
@@ -72,19 +71,14 @@ function SchedulePage({ token, userId }: SchedPageProps) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     try {
       let payload = {
-        userid: userId,
         date: date?.toISOString(),
         timeSlot: timeSlot,
         address: address,
         cansCount: parseInt(cansCount),
         notes: notes,
       };
-
-      setIsSubmitting(true);
 
       const res = await api().post("/schedule", payload, {
         headers: {

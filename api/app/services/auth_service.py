@@ -5,31 +5,32 @@ import os
 import pyotp
 from werkzeug.utils import secure_filename
 from app.models.db import get_db_connection_string
-from app.config import Config
-from passlib.hash import bcrypt
+from app.config import Config 
+from firebase_admin import auth
 
 secret_key = Config.SECRET_KEY
 
-def authenticate_user(email, password, remember_me):
+def authenticate_user(id_token: str, remember_me: bool = False):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
 
     try:
         cnxn = pyodbc.connect(conn_str)
-        cursor = cnxn.cursor() 
+        cursor = cnxn.cursor()
+
+        decoded = auth.verify_id_token(id_token)
+        uid = decoded["uid"]
+        email = decoded.get("email")
  
         query = "SELECT UserID, Password, twofa_enabled, twofa_secret FROM Users WHERE Email = ?"
         cursor.execute(query, (email,)) 
         user_row = cursor.fetchone()
 
         if not user_row:
-            return {"success": False, "message": "Invalid credentials."}
+            return {"success": False, "message": "User not registered in system."}
         
-        user_id, stored_hash, twofa_enabled, twofa_secret = user_row
-
-        if not bcrypt.verify(password, stored_hash):
-            return {"success": False, "message": "Invalid credentials."}
+        user_id, twofa_enabled, twofa_secret = user_row
         
         if twofa_enabled == 1:
             temp_token = generate_token(
@@ -43,16 +44,17 @@ def authenticate_user(email, password, remember_me):
                 "temp_token": temp_token
             }
         
-        token = generate_token({"email": email, "userId": user_id}, remember_me)
+        token = generate_token({"email": email, "userId": user_id})
         return {
             "success": True,
             "message": "Authentication successful.",
+            "uid": uid,
             "userId": user_id,
-            "token": token,
-            "remember_me": remember_me,
+            "token": token, 
             "email": email,
             "twofa_enabled" : twofa_enabled,
-            "twofa_secret" : twofa_secret
+            "twofa_secret" : twofa_secret,
+            "remember_me": remember_me
         } 
 
     except pyodbc.Error as ex:
@@ -88,27 +90,25 @@ def register_user(data):
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor()
  
+        firebase_uid = data.get("firebase_uid")
         name = data.get("name")
         email = data.get("email")
         cpf = data.get("cpf")
-        country = data.get("country")
-        password = data.get("password")
-        profile_image = data.get("profile_image_base64") 
+        country = data.get("country") 
+        profile_image = data.get("avatar_filename")  
 
-        hashed_pass = bcrypt.hash(password)
-
-        cursor.execute("SELECT COUNT(*) FROM Users WHERE Email = ?", (email,))
+        cursor.execute("SELECT COUNT(*) FROM Users WHERE email = ?", (email,))
         if cursor.fetchone()[0] > 0:
             return {"success": False, "message": "Email already registered."}
 
         insert_query = """
-        INSERT INTO Users (Name, Email, CPF, Country, Password)
+        INSERT INTO Users (firebase_uid, name, email, cpf, country)
         OUTPUT INSERTED.UserID
         VALUES (?, ?, ?, ?, ?)
         """
         cursor.execute(
             insert_query,
-            (name, email, cpf, country, hashed_pass)
+            (firebase_uid, name, email, cpf, country)
         )
 
         user_id = cursor.fetchone()[0]
@@ -125,7 +125,7 @@ def register_user(data):
 
             avatar_url = f"/avatars/{filename}"
 
-            update_query = "UPDATE Users SET ProfileImage = ? WHERE UserID = ?"
+            update_query = "UPDATE Users SET avatar = ? WHERE UserID = ?"
             cursor.execute(
                 update_query,
                 (avatar_url, user_id)
@@ -135,8 +135,7 @@ def register_user(data):
 
         return {
             "success": True,
-            "message": "User registered successfully.",
-            "userId": user_id
+            "message": "User registered successfully."
         }
 
     except pyodbc.Error as ex:
@@ -146,7 +145,6 @@ def register_user(data):
     finally:
         if 'cnxn' in locals() and cnxn:
             cnxn.close() 
-
 
 def twofa_user(data):
     conn_str = get_db_connection_string()

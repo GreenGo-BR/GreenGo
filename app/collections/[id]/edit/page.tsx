@@ -47,10 +47,9 @@ const timeSlots = [
 
 type ColEditPageProps = {
   token: string;
-  userId: number;
 };
 
-function EditCollectionPage({ token, userId }: ColEditPageProps) {
+function EditCollectionPage({ token }: ColEditPageProps) {
   const { language } = useLanguage();
   const router = useRouter();
   const { id } = useParams();
@@ -90,11 +89,11 @@ function EditCollectionPage({ token, userId }: ColEditPageProps) {
 
       const collection = res.data.collection;
 
-      setDate(new Date(collection.CollectionDate));
-      setTimeSlot(collection.CollectionTime);
-      setAddress(collection.PickupAddress);
-      setCansCount(String(collection.NumberOfItems));
-      setNotes(collection.Notes || "");
+      setDate(new Date(collection.collection_date));
+      setTimeSlot(collection.collection_time);
+      setAddress(collection.pickup_address);
+      setCansCount(String(collection.number_items));
+      setNotes(collection.notes || "");
     } catch (err) {
       console.error(err);
     }
@@ -118,7 +117,6 @@ function EditCollectionPage({ token, userId }: ColEditPageProps) {
 
       let payload = {
         id: cleanId,
-        userId: userId,
         date: date?.toISOString(),
         timeSlot: timeSlot,
         address: address,

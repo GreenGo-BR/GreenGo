@@ -1,39 +1,52 @@
 from flask import Blueprint, request, jsonify
+from firebase_admin import auth
+
 from app.services.auth_service import authenticate_user, register_user, twofa_user
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
-    remember_me = str(data.get("rememberMe")).lower() == "true"
 
-    print("Raw remember_me value:", data.get("rememberMe"))
-    print("Final remember_me bool:", remember_me)
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "message": "Missing or invalid Authorization header"}), 401
 
-    result = authenticate_user(email, password, remember_me)
-    status_code = 200 if result.get("success") else 401
-    return jsonify(result), status_code
+    id_token = auth_header.split("Bearer ")[1]
+
+    try:  
+        decoded = auth.verify_id_token(id_token, clock_skew_seconds=60)
+        uid = decoded["uid"]
+        email = decoded.get("email")
+        phone = decoded.get("phone_number")
+        return jsonify({
+            "success": True,
+            "message": "Authentication successful",
+            "uid": uid,
+            "email": email,
+            "phone" : phone,
+        }), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Invalid token: {e}"}), 401 
 
 @auth_bp.route('/register', methods=['POST'])
 def register():  
 
+    firebase_uid = request.form.get("firebase_uid")
     name = request.form.get("name")
     email = request.form.get("email")
     cpf = request.form.get("cpf")
     country = request.form.get("country")
-    password = request.form.get("password")
-    profile_image_base64 = request.files.get("avatar")
+    avatar_file = request.files.get("avatar")
     
     data = {
+        "firebase_uid": firebase_uid,
         "name": name,
         "email": email,
         "cpf": cpf,
-        "country": country,
-        "password": password, 
-        "profile_image_base64": profile_image_base64,
+        "country": country, 
+        "avatar_filename": avatar_file.filename if avatar_file else None,
     } 
     result = register_user(data)
 
