@@ -1,5 +1,7 @@
 import pyodbc
+from flask import jsonify, request
 from app.models.db import get_db_connection_string
+
 
 def get_all_users():
     conn_str = get_db_connection_string()
@@ -35,4 +37,18 @@ def get_all_users():
         return {"success": False, "message": f"Unexpected error: {e}"}
     finally:
         if 'cnxn' in locals() and cnxn:
-            cnxn.close() 
+            cnxn.close()
+
+def get_user_id_by_firebase_uid(uid: str): 
+    conn_str = get_db_connection_string()
+    with pyodbc.connect(conn_str) as cnxn, cnxn.cursor() as cursor:
+        cursor.execute("SELECT UserID FROM Users WHERE firebase_uid = ?", (uid,))
+        row = cursor.fetchone()
+        return row[0] if row else None
+    
+def get_user_fcm_token_by_user_id(userid: str): 
+    conn_str = get_db_connection_string()
+    with pyodbc.connect(conn_str) as cnxn, cnxn.cursor() as cursor:
+        cursor.execute("SELECT fcm_token FROM UserTokens WHERE UserID = ?", (userid,))
+        row = cursor.fetchall()
+        return row[0] if row else None

@@ -55,7 +55,6 @@ export default function TwoFAPage() {
 
       if (res.data?.token) {
         localStorage.removeItem("tempToken");
-        localStorage.setItem("authToken", res.data.token);
         router.push("/home");
       } else {
         setError(res.data?.message || "Verification failed. Try again.");
@@ -76,15 +75,6 @@ export default function TwoFAPage() {
           <label htmlFor="code" className="block text-sm font-medium mb-1">
             {t("auth.2fa.code") || "Authentication Code"}
           </label>
-          {/* <Input
-            id="code"
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="123456"
-            {...register("code")}
-            className={errors.code ? "border-red-300" : ""}
-          /> */}
           <Input
             type="text"
             placeholder="000000"

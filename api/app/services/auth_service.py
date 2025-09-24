@@ -7,10 +7,11 @@ from werkzeug.utils import secure_filename
 from app.models.db import get_db_connection_string
 from app.config import Config 
 from firebase_admin import auth
+from flask import jsonify, request
 
 secret_key = Config.SECRET_KEY
 
-def authenticate_user(id_token: str, remember_me: bool = False):
+def authenticate_user(id_token: str):
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
@@ -19,11 +20,12 @@ def authenticate_user(id_token: str, remember_me: bool = False):
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor()
 
-        decoded = auth.verify_id_token(id_token)
+        decoded = auth.verify_id_token(id_token, clock_skew_seconds=60)
         uid = decoded["uid"]
         email = decoded.get("email")
+        phone = decoded.get("phone_number")
  
-        query = "SELECT UserID, Password, twofa_enabled, twofa_secret FROM Users WHERE Email = ?"
+        query = "SELECT UserID, twofa_enabled, twofa_secret FROM Users WHERE Email = ?"
         cursor.execute(query, (email,)) 
         user_row = cursor.fetchone()
 
@@ -44,17 +46,16 @@ def authenticate_user(id_token: str, remember_me: bool = False):
                 "temp_token": temp_token
             }
         
-        token = generate_token({"email": email, "userId": user_id})
+        # token = generate_token({"email": email, "userId": user_id})
         return {
             "success": True,
             "message": "Authentication successful.",
             "uid": uid,
             "userId": user_id,
-            "token": token, 
+            # "token": token, 
             "email": email,
             "twofa_enabled" : twofa_enabled,
-            "twofa_secret" : twofa_secret,
-            "remember_me": remember_me
+            "twofa_secret" : twofa_secret, 
         } 
 
     except pyodbc.Error as ex:
@@ -189,7 +190,7 @@ def twofa_user(data):
         return {
             "success": True,
             "message": "2FA verified successfully.",
-            "token": token
+            # "token": token
         }
 
     except jwt.ExpiredSignatureError:
@@ -203,3 +204,16 @@ def twofa_user(data):
     finally:
         if 'cnxn' in locals() and cnxn:
             cnxn.close()
+
+def get_firebase_uid(): 
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None, jsonify({"success": False, "message": "Missing or invalid token"}), 401
+
+    id_token = auth_header.split(" ")[1]
+
+    try:
+        decoded = auth.verify_id_token(id_token)
+        return decoded["uid"], None, None
+    except Exception as e:
+        return None, jsonify({"success": False, "message": f"Token verification failed: {e}"}), 401

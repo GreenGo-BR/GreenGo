@@ -32,10 +32,10 @@ export function LogoutConfirmationModal({
 
   const handleConfirm = async () => {
     setIsLoading(true);
-    try { 
+    try {
       await signOut(auth);
- 
-      router.push("/login");
+      localStorage.removeItem("authToken");
+      // router.push("/login");
       onClose();
     } catch (error) {
       console.error("Erro ao fazer logout:", error);

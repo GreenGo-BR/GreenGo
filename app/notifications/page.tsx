@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NotificationCard } from "@/components/notification-card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,85 +8,115 @@ import { Bell, Check } from "lucide-react";
 import Navigation from "@/components/navigation";
 import { useLanguage } from "@/contexts/language-context";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
+import { withAuth } from "@/components/withAuth";
+import { api } from "@/lib/api";
 
-export default function NotificationsPage() {
+interface Notifications {
+  id: string;
+  type: "collection" | "payment" | "system" | "alert";
+  title: string;
+  message: string;
+  date: Date;
+  read: boolean;
+  onMarkAsRead?: (id: string) => void;
+}
+// Dados simulados baseados no idioma
+type NotifMethodProps = {
+  token: string;
+  uid: string;
+};
+
+function NotificationsPage({ token }: NotifMethodProps) {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
-  useScrollToTop();
 
-  // Dados simulados baseados no idioma
-  const initialNotifications = [
-    {
-      id: "not1",
-      type: "collection" as const,
-      title: language === "pt-BR" ? "Coleta agendada" : "Collection scheduled",
-      message:
-        language === "pt-BR"
-          ? "Sua coleta foi agendada para 24/05/2024 entre 14:00 e 16:00."
-          : "Your collection has been scheduled for 05/24/2024 between 2:00 PM and 4:00 PM.",
-      date: new Date(2024, 4, 20, 14, 30),
-      read: false,
-    },
-    {
-      id: "not2",
-      type: "system" as const,
-      title:
-        language === "pt-BR" ? "Bem-vindo ao GreenGo!" : "Welcome to GreenGo!",
-      message:
-        language === "pt-BR"
-          ? "Obrigado por se juntar à nossa comunidade de reciclagem."
-          : "Thank you for joining our recycling community.",
-      date: new Date(2024, 4, 19, 10, 15),
-      read: true,
-    },
-    {
-      id: "not3",
-      type: "payment" as const,
-      title: language === "pt-BR" ? "Pagamento recebido" : "Payment received",
-      message:
-        language === "pt-BR"
-          ? "Você recebeu R$ 17,50 pela sua última coleta de latinhas."
-          : "You received $8.75 for your last can collection.",
-      date: new Date(2024, 4, 18, 16, 45),
-      read: false,
-    },
-    {
-      id: "not4",
-      type: "alert" as const,
-      title:
-        language === "pt-BR" ? "Lembrete de coleta" : "Collection reminder",
-      message:
-        language === "pt-BR"
-          ? "Sua coleta está agendada para amanhã entre 14:00 e 16:00."
-          : "Your collection is scheduled for tomorrow between 2:00 PM and 4:00 PM.",
-      date: new Date(2024, 4, 23, 9, 0),
-      read: false,
-    },
-    {
-      id: "not5",
-      type: "system" as const,
-      title: language === "pt-BR" ? "Atualização do aplicativo" : "App update",
-      message:
-        language === "pt-BR"
-          ? "O GreenGo foi atualizado com novos recursos e melhorias."
-          : "GreenGo has been updated with new features and improvements.",
-      date: new Date(2024, 4, 15, 11, 20),
-      read: true,
-    },
-  ];
-
-  const [notifications, setNotifications] = useState(initialNotifications);
-
+  const [notifications, setNotifications] = useState<Notifications[]>([]);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  useScrollToTop();
+
+  useEffect(() => {
+    if (!token) return;
+    const fetchNotifMethods = async () => {
+      try {
+        const res = await api().get("/notifications", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const methods = (res.data?.result ?? []).map((n: any) => ({
+          id: String(n.NotificationID),
+          type: n.type,
+          title: n.title,
+          message: n.messages,
+          date: n.created_at,
+          read: n.isread == 1,
+        }));
+
+        setNotifications(methods);
+      } catch (err) {
+        console.error(err);
+        setNotifications([]);
+      }
+    };
+    fetchNotifMethods();
+  }, []);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const res = await api().post(
+        `/notifications/update/${id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.success) {
+        setNotifications(
+          notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+        );
+      } else {
+        alert(
+          language === "pt-BR"
+            ? "Falha ao marcar como lida."
+            : "Failed to mark as read."
+        );
+      }
+    } catch (err) {
+      alert(
+        language === "pt-BR"
+          ? "Falha ao marcar como lida."
+          : "Failed to mark as read."
+      );
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = async () => {
+    try {
+      const res = await api().post(
+        `/notifications/update/${0}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.success) {
+        setNotifications(notifications.map((n) => ({ ...n, read: true })));
+      } else {
+        alert(
+          language === "pt-BR"
+            ? "Falha ao marcar como lida."
+            : "Failed to mark all as read."
+        );
+      }
+    } catch (err) {
+      alert(
+        language === "pt-BR"
+          ? "Falha ao marcar como lida."
+          : "Failed to mark all as read."
+      );
+    }
   };
 
   const filteredNotifications = notifications.filter((n) => {
@@ -203,3 +233,4 @@ export default function NotificationsPage() {
     </div>
   );
 }
+export default withAuth(NotificationsPage);

@@ -17,23 +17,38 @@ def schedule_collections(data, userid):
         cans_count = data.get("cansCount")
         notes = data.get("notes")
         weight = round(int(cans_count) / 60, 2)
-        status = "scheduled" 
+        status = "scheduled"
+
+        cursor.execute("""
+            SELECT rate_perkg
+            FROM CanPricing
+            WHERE default_price = 1
+        """)
+        row = cursor.fetchone()
+        if not row:
+            return {"success": False, "message": "No default pricing found."}
+
+        rate_perkg = float(row[0])   # convert Decimal → float
+        total_price = round(weight * rate_perkg, 2)
+
+        print(total_price)
+
         if id == 0: 
             insert_query = """
-            INSERT INTO Collections (UserID, collection_date, collection_time, pickup_address, number_items, weight, status, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Collections (UserID, collection_date, collection_time, pickup_address, number_items, weight, rates, amount, status, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
-            cursor.execute(insert_query, (userid, date, time_slot, address, cans_count, weight, status, notes))
+            cursor.execute(insert_query, (userid, date, time_slot, address, cans_count, weight, rate_perkg, total_price, status, notes))
             
         else: 
     
             update_query = """
                 UPDATE Collections
                 SET UserID = ?, collection_date = ?, collection_time = ?, pickup_address = ?, 
-                    number_items = ?, weight = ?, status = ?, notes = ?
+                    number_items = ?, weight = ?, rates = ?, amount = ?, status = ?, notes = ?
                 WHERE ColID = ?
             """
-            cursor.execute(update_query, (userid, date, time_slot, address, cans_count, weight, status, notes, id))
+            cursor.execute(update_query, (userid, date, time_slot, address, cans_count, weight, rate_perkg, total_price, status, notes, id))
         
         cnxn.commit()
 
@@ -46,7 +61,8 @@ def schedule_collections(data, userid):
                 "timeSlot": time_slot,
                 "address": address,
                 "cansCount": cans_count,
-                "notes": notes
+                "notes": notes,
+                "amount" : total_price
             }
         }
        

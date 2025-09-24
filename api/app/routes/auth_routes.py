@@ -1,7 +1,6 @@
-from flask import Blueprint, request, jsonify
-from firebase_admin import auth
+from flask import Blueprint, request, jsonify 
 
-from app.services.auth_service import authenticate_user, register_user, twofa_user
+from app.services.auth_service import authenticate_user, register_user, twofa_user 
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -15,17 +14,25 @@ def login():
     id_token = auth_header.split("Bearer ")[1]
 
     try:  
-        decoded = auth.verify_id_token(id_token, clock_skew_seconds=60)
+        
+        """   decoded = auth.verify_id_token(id_token, clock_skew_seconds=60)
         uid = decoded["uid"]
         email = decoded.get("email")
-        phone = decoded.get("phone_number")
-        return jsonify({
+        phone = decoded.get("phone_number") """
+
+        result = authenticate_user(id_token)
+
+        status_code = 200 if result.get("success") else 400
+        return jsonify(result), status_code
+        
+        """ return jsonify({
             "success": True,
             "message": "Authentication successful",
             "uid": uid,
             "email": email,
             "phone" : phone,
-        }), 200
+            "twofa_enabled" : userinfo.twofa_enabled
+        }), 200 """
 
     except Exception as e:
         return jsonify({"success": False, "message": f"Invalid token: {e}"}), 401 

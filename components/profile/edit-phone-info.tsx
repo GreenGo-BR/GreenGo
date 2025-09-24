@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Save, X } from "lucide-react";
@@ -29,22 +28,18 @@ const countries = [
   { code: "ES", name: { "pt-BR": "Espanha", "en-US": "Spain" } },
 ];
 
-export function EditPhoneInfo({
-  initialData,
-  token,
-  onSave,
-  onCancel,
-}: EditPhoneInfoProps) {
+export function EditPhoneInfo({ initialData, onCancel }: EditPhoneInfoProps) {
   const { t, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
 
+  console.log("auth instance:", auth);
+
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<PhoneInfoFormValues>({
     defaultValues: initialData,
@@ -55,12 +50,7 @@ export function EditPhoneInfo({
       (window as any).recaptchaVerifier = new RecaptchaVerifier(
         auth,
         "recaptcha-container",
-        {
-          size: "invisible",
-          callback: () => {
-            console.log("reCAPTCHA solved");
-          },
-        }
+        { size: "invisible" }
       );
     }
   };
@@ -94,7 +84,7 @@ export function EditPhoneInfo({
         setSuccess("Phone number linked successfully!");
         console.log("Phone linked to user:", user.phoneNumber);
       }
-      let payload = {
+      /*  let payload = {
         phone: data.phone,
       };
       const res = await api().post("/profile/edit", payload, {
@@ -111,7 +101,7 @@ export function EditPhoneInfo({
         setTimeout(() => {
           onSave(data);
         }, 1500);
-      }
+      } */
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {

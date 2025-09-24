@@ -235,13 +235,7 @@ function SchedulePage({ token }: SchedPageProps) {
                       className="w-full justify-start text-left font-normal"
                     >
                       {date ? (
-                        format(
-                          date,
-                          language === "pt-BR"
-                            ? "dd 'de' MMMM 'de' yyyy"
-                            : "MMMM dd, yyyy",
-                          { locale }
-                        )
+                        format(date, t("schedule.dateFormat"), { locale })
                       ) : (
                         <span className="text-muted-foreground">
                           {t("schedule.selectDate")}

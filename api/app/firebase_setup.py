@@ -1,6 +1,6 @@
 import firebase_admin
 import os
-from firebase_admin import credentials
+from firebase_admin import credentials, messaging
 
 def init_firebase():
     # Only initialize once

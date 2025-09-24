@@ -327,6 +327,10 @@ const translations: Translations = {
     "pt-BR": "Sua coleta foi agendada com sucesso",
     "en-US": "Your collection has been successfully scheduled",
   },
+  "schedule.dateFormat": {
+    "pt-BR": "dd 'de' MMMM 'de' yyyy",
+    "en-US": "MMMM dd, yyyy",
+  },
 
   // Suporte
   "support.title": {
@@ -396,6 +400,14 @@ const translations: Translations = {
   "profile.title": {
     "pt-BR": "Meu Perfil",
     "en-US": "My Profile",
+  },
+  "profile.verified": {
+    "pt-BR": "Verificado",
+    "en-US": "Verified",
+  },
+  "profile.premium": {
+    "pt-BR": "Premium",
+    "en-US": "Premium",
   },
   "profile.personalInfo": {
     "pt-BR": "Informações Pessoais",
@@ -582,6 +594,26 @@ const translations: Translations = {
     "pt-BR": "Obtenha suporte e respostas para perguntas comuns.",
     "en-US": "Get support and answers to common questions.",
   },
+  "profile.keyType": {
+    "pt-BR": "Tipo de Chave",
+    "en-US": "Key Type",
+  },
+  "profile.addPixKey": {
+    "pt-BR": "Adicionar Chave Pix",
+    "en-US": "Add Pix Key",
+  },
+  "profile.key": {
+    "pt-BR": "Chave",
+    "en-US": "Key",
+  },
+  "profile.labelOptional": {
+    "pt-BR": "Nome (opcional)",
+    "en-US": "Label (optional)",
+  },
+  "profile.labelPlaceholder": {
+    "pt-BR": "Ex: Email principal, Celular pessoal...",
+    "en-US": "Ex: Main email, Personal phone...",
+  },
 
   // Botões comuns
   "common.back": {
@@ -753,6 +785,32 @@ const translations: Translations = {
   "collections.info.collectorNotified": {
     "pt-BR": "O coletor será notificado sobre as mudanças",
     "en-US": "The collector will be notified about the changes",
+  },
+
+  /* Payment Method */
+  "paymentmethod.title": {
+    "pt-BR": "Métodos de Pagamento",
+    "en-US": "Payment Methods",
+  },
+  "paymentmethod.add": {
+    "pt-BR": "Adicionar",
+    "en-US": "Add",
+  },
+  "paymentmethod.pix_keys": {
+    "pt-BR": "Chaves Pix",
+    "en-US": "Pix Keys",
+  },
+  "paymentmethod.manage": {
+    "pt-BR": "Gerencie suas chaves Pix para receber pagamentos",
+    "en-US": "Manage your Pix keys to receive payments",
+  },
+  "paymentmethod.register": {
+    "pt-BR": "Nenhuma chave Pix cadastrada",
+    "en-US": "No Pix keys registered",
+  },
+  "paymentmethod.addkey": {
+    "pt-BR": "Adicionar primeira chave",
+    "en-US": "Add first key",
   },
 };
 

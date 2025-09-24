@@ -11,7 +11,6 @@ import { useLanguage } from "@/contexts/language-context";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { withAuth } from "@/components/withAuth";
 import { api } from "@/lib/api";
-import { auth } from "@/lib/firebase";
 
 type Collection = {
   id: string;

@@ -1,125 +1,167 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useLanguage } from "@/contexts/language-context"
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useLanguage } from "@/contexts/language-context";
+import { api } from "@/lib/api";
 
 interface PaymentMethod {
-  type: "email" | "phone" | "cpf" | "random"
-  key: string
-  label?: string
-  isDefault: boolean
+  type: "email" | "phone" | "cpf" | "random";
+  key: string;
+  label?: string;
+  isDefault: boolean;
 }
 
 interface AddPaymentMethodModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onAdd: (method: Omit<PaymentMethod, "id">) => void
+  isOpen: boolean;
+  token: string;
+  onClose: () => void;
+  onAdd: (method: Omit<PaymentMethod, "id">) => void;
 }
 
-export function AddPaymentMethodModal({ isOpen, onClose, onAdd }: AddPaymentMethodModalProps) {
-  const { language } = useLanguage()
-  const [type, setType] = useState<"email" | "phone" | "cpf" | "random">("email")
-  const [key, setKey] = useState("")
-  const [label, setLabel] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+export function AddPaymentMethodModal({
+  isOpen,
+  token,
+  onClose,
+  onAdd,
+}: AddPaymentMethodModalProps) {
+  const { language } = useLanguage();
+  const { t } = useLanguage();
+  const [type, setType] = useState<"email" | "phone" | "cpf" | "random">(
+    "email"
+  );
+  const [key, setKey] = useState("");
+  const [label, setLabel] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateKey = (type: string, value: string) => {
     switch (type) {
       case "email":
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       case "phone":
-        return /^$$\d{2}$$\s\d{4,5}-\d{4}$/.test(value)
+        return /^$$\d{2}$$\s\d{4,5}-\d{4}$/.test(value);
       case "cpf":
-        return /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value)
+        return /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value);
       case "random":
-        return value.length >= 32
+        return value.length >= 32;
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   const formatInput = (type: string, value: string) => {
     switch (type) {
       case "phone":
         // Remove all non-digits
-        const digits = value.replace(/\D/g, "")
+        const digits = value.replace(/\D/g, "");
         // Format as (XX) XXXXX-XXXX or (XX) XXXX-XXXX
         if (digits.length <= 11) {
-          return digits.replace(/(\d{2})(\d{4,5})(\d{4})/, "($1) $2-$3")
+          return digits.replace(/(\d{2})(\d{4,5})(\d{4})/, "($1) $2-$3");
         }
-        return value
+        return value;
       case "cpf":
         // Remove all non-digits
-        const cpfDigits = value.replace(/\D/g, "")
+        const cpfDigits = value.replace(/\D/g, "");
         // Format as XXX.XXX.XXX-XX
         if (cpfDigits.length <= 11) {
-          return cpfDigits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
+          return cpfDigits.replace(
+            /(\d{3})(\d{3})(\d{3})(\d{2})/,
+            "$1.$2.$3-$4"
+          );
         }
-        return value
+        return value;
       default:
-        return value
+        return value;
     }
-  }
+  };
 
   const handleKeyChange = (value: string) => {
-    const formatted = formatInput(type, value)
-    setKey(formatted)
-  }
+    const formatted = formatInput(type, value);
+    setKey(formatted);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateKey(type, key)) {
-      alert(language === "pt-BR" ? "Por favor, insira uma chave válida." : "Please enter a valid key.")
-      return
+      alert(
+        language === "pt-BR"
+          ? "Por favor, insira uma chave válida."
+          : "Please enter a valid key."
+      );
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      let payload = {
+        id: "0",
+        type: type,
+        key: key,
+        label: label,
+      };
 
-      onAdd({
-        type,
-        key,
-        label: label || undefined,
-        isDefault: false,
-      })
-
-      // Reset form
-      setType("email")
-      setKey("")
-      setLabel("")
+      const res = await api().post("/payment_methods/add", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.data.success) {
+        const methods: PaymentMethod = {
+          type: res.data.result.type,
+          key: res.data.result.keyname,
+          label: res.data.result.label || "",
+          isDefault: res.data.result.isdefault == 0 ? false : true,
+        };
+        onAdd(methods);
+        onClose();
+      }
     } catch (error) {
-      console.error("Failed to add payment method:", error)
-      alert(language === "pt-BR" ? "Erro ao adicionar método de pagamento." : "Failed to add payment method.")
+      console.error("Failed to add payment method:", error);
+      alert(
+        language === "pt-BR"
+          ? "Erro ao adicionar método de pagamento."
+          : "Failed to add payment method."
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const getPlaceholder = (type: string) => {
     switch (type) {
       case "email":
-        return "exemplo@email.com"
+        return "exemplo@email.com";
       case "phone":
-        return "(11) 99999-9999"
+        return "(11) 99999-9999";
       case "cpf":
-        return "000.000.000-00"
+        return "000.000.000-00";
       case "random":
-        return language === "pt-BR" ? "Cole aqui a chave aleatória do seu banco" : "Paste your bank's random key here"
+        return language === "pt-BR"
+          ? "Cole aqui a chave aleatória do seu banco"
+          : "Paste your bank's random key here";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   const getTypeLabel = (type: string) => {
     const labels = {
@@ -127,35 +169,41 @@ export function AddPaymentMethodModal({ isOpen, onClose, onAdd }: AddPaymentMeth
       phone: language === "pt-BR" ? "Telefone" : "Phone",
       cpf: language === "pt-BR" ? "CPF" : "CPF",
       random: language === "pt-BR" ? "Chave Aleatória" : "Random Key",
-    }
-    return labels[type as keyof typeof labels] || type
-  }
+    };
+    return labels[type as keyof typeof labels] || type;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{language === "pt-BR" ? "Adicionar Chave Pix" : "Add Pix Key"}</DialogTitle>
+          <DialogTitle>{t("profile.addPixKey")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="type">{language === "pt-BR" ? "Tipo de Chave" : "Key Type"}</Label>
+            <Label htmlFor="type">{t("profile.keyType")}</Label>
             <Select value={type} onValueChange={(value: any) => setType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="email">📧 {getTypeLabel("email")}</SelectItem>
-                <SelectItem value="phone">📱 {getTypeLabel("phone")}</SelectItem>
+              <SelectContent position="popper" side="bottom" align="start">
+                <SelectItem value="email">
+                  📧 {getTypeLabel("email")}
+                </SelectItem>
+                <SelectItem value="phone">
+                  📱 {getTypeLabel("phone")}
+                </SelectItem>
                 <SelectItem value="cpf">🆔 {getTypeLabel("cpf")}</SelectItem>
-                <SelectItem value="random">🔑 {getTypeLabel("random")}</SelectItem>
+                <SelectItem value="random">
+                  🔑 {getTypeLabel("random")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="key">{language === "pt-BR" ? "Chave" : "Key"}</Label>
+            <Label htmlFor="key">{t("profile.key")}</Label>
             <Input
               id="key"
               value={key}
@@ -166,14 +214,12 @@ export function AddPaymentMethodModal({ isOpen, onClose, onAdd }: AddPaymentMeth
           </div>
 
           <div>
-            <Label htmlFor="label">{language === "pt-BR" ? "Nome (opcional)" : "Label (optional)"}</Label>
+            <Label htmlFor="label">{t("profile.labelOptional")}</Label>
             <Input
               id="label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder={
-                language === "pt-BR" ? "Ex: Email principal, Celular pessoal..." : "Ex: Main email, Personal phone..."
-              }
+              placeholder={t("profile.labelPlaceholder")}
             />
           </div>
 
@@ -183,16 +229,19 @@ export function AddPaymentMethodModal({ isOpen, onClose, onAdd }: AddPaymentMeth
                 ? language === "pt-BR"
                   ? "Adicionando..."
                   : "Adding..."
-                : language === "pt-BR"
-                  ? "Adicionar"
-                  : "Add"}
+                : t("paymentmethod.add")}
             </Button>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-              {language === "pt-BR" ? "Cancelar" : "Cancel"}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              {t("common.cancel")}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

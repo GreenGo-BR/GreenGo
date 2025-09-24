@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import Navigation from "@/components/navigation";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
-import { EnhancedBackground } from "@/components/enhanced-background";
 import { Plus, MapPin, Calendar, Clock, Package } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import Link from "next/link";

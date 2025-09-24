@@ -259,7 +259,7 @@ function CollectionDetailsPage({ token }: ColDetPageProps) {
 
         <GlassCard className="mb-4">
           <h3 className="text-lg font-semibold mb-3">
-            {t("collections.Collector")}
+            {t("collections.collector")}
           </h3>
 
           {collectionDetails.collector ? (

@@ -1,9 +1,12 @@
 import type React from "react";
+import { useEffect } from "react";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/language-context";
+import Notifications from "@/components/notifications";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -58,6 +61,8 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange={false}
         >
+          <Notifications />
+          <Toaster />
           <LanguageProvider>
             <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
               {children}

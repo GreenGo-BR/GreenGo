@@ -1,42 +1,20 @@
 from flask import Blueprint, jsonify, request
+from app.services.auth_service import get_firebase_uid
+from app.services.user_service import get_user_id_by_firebase_uid  
 from app.services.collections_service import get_collections
-from app.models.db import get_db_connection_string
-import pyodbc
-from firebase_admin import auth
 
 collections_bp = Blueprint('collections', __name__)
 
 @collections_bp.route('/collections', methods=['GET'])
 def collections():
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return jsonify({"success": False, "message": "Missing or invalid token"}), 401
+    uid, error_response, status_code = get_firebase_uid()
+    if not uid:
+        return error_response, status_code
 
-    id_token = auth_header.split(" ")[1]
-
-    try:
-        decoded = auth.verify_id_token(id_token)
-        uid = decoded["uid"]   # ✅ Firebase UID
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Token verification failed: {e}"}), 401
- 
-    conn_str = get_db_connection_string()
-    try:
-        cnxn = pyodbc.connect(conn_str)
-        cursor = cnxn.cursor()
-        cursor.execute("SELECT UserID FROM Users WHERE firebase_uid = ?", (uid,))
-        row = cursor.fetchone()
-
-        if not row:
-            return jsonify({"success": False, "message": "User not found"}), 404
-
-        userid = row[0]
-
-    finally:
-        if 'cnxn' in locals() and cnxn:
-            cnxn.close()
-
-    # Pass userid into service
-    result = get_collections(userid)
+    user_id = get_user_id_by_firebase_uid(uid)
+    if not user_id:
+        return jsonify({"success": False, "message": "User not found"}), 404
+    
+    result = get_collections(user_id)
     status_code = 200 if result.get("success") else 400
     return jsonify(result), status_code
