@@ -22,32 +22,33 @@ def schedule():
     data = request.get_json() 
     result = schedule_collections(data, user_id)
 
-    # raw_date = data.get("date") 
-    # formatted_date = None
+    raw_date = data.get("date") 
+    formatted_date = None
 
-    # if raw_date:
-    #     try:
-    #         parsed_date = datetime.fromisoformat(raw_date.replace("Z", ""))
-    #         formatted_date = parsed_date.strftime("%d/%m/%Y")
-    #     except Exception:
-    #         formatted_date = raw_date 
+    if raw_date:
+        try:
+            parsed_date = datetime.fromisoformat(raw_date.replace("Z", ""))
+            formatted_date = parsed_date.strftime("%d/%m/%Y")
+        except Exception:
+            formatted_date = raw_date 
 
-    # notif_data = {
-    #     "title": "Collection scheduled",
-    #     "message": f"Your collection has been scheduled for {formatted_date or data.get('date')} between {data.get('timeSlot')}.",
-    #     "type": "collection"
-    # }
+    notif_data = {
+        "title": "Collection scheduled",
+        "message": f"Your collection has been scheduled for {formatted_date or data.get('date')} between {data.get('timeSlot')}.",
+        "type": "collection"
+    }
 
-    # notification = create_notifications(user_id, notif_data)
+    notification = create_notifications(user_id, notif_data)
  
-    # if notification:
+    if notification:
 
-    #     userfcm_token = get_user_fcm_token_by_user_id(user_id)
-    #     notif_title = notification.get("result", {}).get("title", "GreenGo")
-    #     notif_body = notification.get("result", {}).get("messages", "")
+        userfcm_token = get_user_fcm_token_by_user_id(user_id)
+        notif_title = notification.get("result", {}).get("title", "GreenGo")
+        notif_body = notification.get("result", {}).get("messages", "")
 
-    #     for token in userfcm_token:
-    #         send_push(token, notif_title, notif_body)
+        print(userfcm_token)
+        for token in userfcm_token:
+            send_push(token, notif_title, notif_body)
 
     status_code = 200 if result.get("success") else 400
     return jsonify(result), status_code

@@ -11,52 +11,47 @@ from flask import jsonify, request
 
 secret_key = Config.SECRET_KEY
 
-def authenticate_user(id_token: str):
+def authenticate_user(user_id: int, firebase_uid: str) -> dict:
     conn_str = get_db_connection_string()
     if not conn_str:
         return {"success": False, "message": "Database configuration error."}
 
     try:
-        cnxn = pyodbc.connect(conn_str)
-        cursor = cnxn.cursor()
+        with pyodbc.connect(conn_str) as cnxn, cnxn.cursor() as cursor:  
+            query = "SELECT UserID, firebase_uid, email, twofa_enabled, twofa_secret FROM Users WHERE firebase_uid = ?"
+            cursor.execute(query, (firebase_uid,)) 
+            rows = cursor.fetchone()
 
-        decoded = auth.verify_id_token(id_token, clock_skew_seconds=60)
-        uid = decoded["uid"]
-        email = decoded.get("email")
-        phone = decoded.get("phone_number")
- 
-        query = "SELECT UserID, twofa_enabled, twofa_secret FROM Users WHERE Email = ?"
-        cursor.execute(query, (email,)) 
-        user_row = cursor.fetchone()
-
-        if not user_row:
-            return {"success": False, "message": "User not registered in system."}
-        
-        user_id, twofa_enabled, twofa_secret = user_row
-        
-        if twofa_enabled == 1:
-            temp_token = generate_token(
-                {"email": email, "userId": user_id, "type": "2fa"},
-                custom_expiry=datetime.timedelta(minutes=5)
-            )
-            return {
-                "success": True,
-                "message": "2FA required.",
-                "twofa_required": True,
-                "temp_token": temp_token
-            }
-        
-        # token = generate_token({"email": email, "userId": user_id})
+            if not rows:
+                return {
+                    "success": True, 
+                    "message": "User not registered in system.", 
+                    "result": None
+                }
+            
+            columns = [col[0] for col in cursor.description]
+            result = dict(zip(columns, rows))
+            
+            user_id = result["UserID"]
+            twofa_enabled = result["twofa_enabled"]
+            
+            if twofa_enabled == 1:
+                temp_token = generate_token(
+                    {"userId": user_id, "type": "2fa"}, 
+                    custom_expiry=datetime.timedelta(minutes=5)
+                )
+                return {
+                    "success": True,
+                    "message": "2FA required.",
+                    "twofa_required": True,
+                    "temp_token": temp_token
+                } 
         return {
             "success": True,
             "message": "Authentication successful.",
-            "uid": uid,
-            "userId": user_id,
-            # "token": token, 
-            "email": email,
-            "twofa_enabled" : twofa_enabled,
-            "twofa_secret" : twofa_secret, 
-        } 
+            "result" : result,
+            
+        }  
 
     except pyodbc.Error as ex:
         sqlstate = ex.args[0]

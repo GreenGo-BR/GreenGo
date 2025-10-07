@@ -32,6 +32,8 @@ function CollectionsPage({ token }: ColPageProps) {
   const [collections, setCollections] = useState<mockCollections[]>([]);
 
   useEffect(() => {
+    if (!token) return;
+
     const load = async () => {
       try {
         await fetchCollections(token);

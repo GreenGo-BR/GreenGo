@@ -10,7 +10,6 @@ export const requestForToken = async () => {
   try {
     const currentToken = await getToken(messages, { vapidKey: VAPID_KEY });
     if (currentToken) {
-      // console.log("✅ Current FCM token:", currentToken);
       return currentToken;
     } else {
       console.warn("⚠️ No registration token available.");
@@ -27,7 +26,6 @@ export const onMessageListener = () =>
     if (!messages) return;
 
     onMessage(messages, (payload) => {
-      // console.log("📩 Foreground message received:", payload);
       resolve(payload);
     });
   });

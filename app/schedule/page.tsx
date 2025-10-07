@@ -6,6 +6,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
+import addNotification from "react-push-notification";
 import {
   Popover,
   PopoverContent,
@@ -85,8 +86,16 @@ function SchedulePage({ token }: SchedPageProps) {
           Authorization: `Bearer ${token}`,
         },
       });
+
       if (res.data.success) {
         setIsSuccess(true);
+        addNotification({
+          title: "Agendamento Confirmado ✅",
+          subtitle: "Seu agendamento foi criado com sucesso.",
+          message: `Data: ${date?.toLocaleDateString()} às ${timeSlot}`,
+          theme: "light",
+          native: true,
+        });
       }
     } catch (errs) {
       console.log(errs);

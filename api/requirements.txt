@@ -7,3 +7,4 @@ axios
 passlib[bcrypt]
 pyotp 
 qrcode[pil]
+firebase-admin

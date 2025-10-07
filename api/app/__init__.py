@@ -11,7 +11,8 @@ from app.routes.profile_routes import profile_bp
 from app.routes.password_routes import reset_password_bp
 from app.routes.pm_routes import rm_bp
 from app.routes.notifications_routes import notifications_bp
-# from app.routes.register_routes import register_bp
+from app.routes.wallet_routes import wallet_bp
+# from app.routes.register_routes import register_bpcd
 from app.firebase_setup import init_firebase
 
 load_dotenv()
@@ -33,6 +34,7 @@ def create_app():
     app.register_blueprint(reset_password_bp, url_prefix='/api')
     app.register_blueprint(rm_bp, url_prefix='/api')
     app.register_blueprint(notifications_bp, url_prefix='/api')
+    app.register_blueprint(wallet_bp, url_prefix='/api')
     # app.register_blueprint(register_bp, url_prefix='/api')
     
     return app

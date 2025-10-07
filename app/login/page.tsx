@@ -114,7 +114,6 @@ export default function LoginPage() {
           else setError(res.data?.message || "Login failed.");
         }
       } else {
-        // Email/password flow
         await setAuthPersistence(true);
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -128,6 +127,14 @@ export default function LoginPage() {
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        if (res.data.twofa_required && res.data.temp_token) {
+          localStorage.setItem("tempToken", res.data.temp_token);
+          router.push("/2fa");
+          return;
+        } else {
+          router.push("/home");
+        }
+
         if (res.data?.success) router.push("/home");
         else setError(res.data?.message || "Login failed.");
       }

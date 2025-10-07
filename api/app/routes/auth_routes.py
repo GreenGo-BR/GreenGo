@@ -1,41 +1,24 @@
 from flask import Blueprint, request, jsonify 
-
+from app.services.auth_service import get_firebase_uid
+from app.services.user_service import get_user_id_by_firebase_uid 
 from app.services.auth_service import authenticate_user, register_user, twofa_user 
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    uid, error_response, status_code = get_firebase_uid()
+    if not uid:
+        return error_response, status_code
+ 
+    user_id = get_user_id_by_firebase_uid(uid)
+    if not user_id:
+        return jsonify({"success": False, "message": "User not found"}), 404
+ 
+    result = authenticate_user(user_id, uid)
 
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return jsonify({"success": False, "message": "Missing or invalid Authorization header"}), 401
-
-    id_token = auth_header.split("Bearer ")[1]
-
-    try:  
-        
-        """   decoded = auth.verify_id_token(id_token, clock_skew_seconds=60)
-        uid = decoded["uid"]
-        email = decoded.get("email")
-        phone = decoded.get("phone_number") """
-
-        result = authenticate_user(id_token)
-
-        status_code = 200 if result.get("success") else 400
-        return jsonify(result), status_code
-        
-        """ return jsonify({
-            "success": True,
-            "message": "Authentication successful",
-            "uid": uid,
-            "email": email,
-            "phone" : phone,
-            "twofa_enabled" : userinfo.twofa_enabled
-        }), 200 """
-
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Invalid token: {e}"}), 401 
+    status_code = 200 if result.get("success") else 400
+    return jsonify(result), status_code 
 
 @auth_bp.route('/register', methods=['POST'])
 def register():  
@@ -74,6 +57,7 @@ def verify_2fa():
         "code": code,
         "temp_token": temp_token, 
     } 
+ 
     result = twofa_user(data)
 
     status_code = 200 if result.get("success") else 400

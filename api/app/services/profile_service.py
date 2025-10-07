@@ -15,7 +15,7 @@ def get_profile(uid):
         cnxn = pyodbc.connect(conn_str)
         cursor = cnxn.cursor() 
 
-        cursor.execute("SELECT name, email, cpf, country, avatar, phone_number FROM Users WHERE firebase_uid = ?", uid)
+        cursor.execute("SELECT name, email, cpf, country, avatar, phone_number, notifications, darkmode FROM Users WHERE firebase_uid = ?", uid)
         profile = cursor.fetchone()
                     
         cnxn.commit()
@@ -28,7 +28,9 @@ def get_profile(uid):
                 "phone" : profile.phone_number,
                 "cpf" : profile.cpf,
                 "country" : profile.country,
-                "avatar" : profile.avatar
+                "avatar" : profile.avatar,
+                "notif" : profile.notifications,
+                "darkmode" : profile.darkmode
             }
         }
        
@@ -229,7 +231,14 @@ def two_factor_profile(data, uid):
                 return {"success": True, "message": "2FA enabled"}
             else:
                 return {"success": False, "message": "Invalid code"}
-            
+        elif action == "disabled":
+
+            if uid:
+                disabled_user_2fa(cursor, uid)
+                cnxn.commit()
+                return {"success": True, "message": "2FA disabled"}
+            else:
+                return {"success": False, "message": "Invalid user id"}
         else:
             return {"success": False, "message": "Invalid action"}
        
@@ -247,6 +256,9 @@ def update_user_2fa_secret(cursor, uid, secret):
 
 def enable_user_2fa(cursor, uid): 
     cursor.execute("UPDATE Users SET twofa_enabled = 1 WHERE firebase_uid = ?", (uid,))
+
+def disabled_user_2fa(cursor, uid): 
+    cursor.execute("UPDATE Users SET twofa_enabled = 0, twofa_secret = NULL WHERE firebase_uid = ?", (uid,))
 
 def get_user_by_id(cursor, uid):
     cursor.execute("SELECT twofa_secret, twofa_enabled FROM Users WHERE firebase_uid = ?", (uid,))
@@ -276,6 +288,73 @@ def twofa_status_profile(uid):
             return {"success": True, "enabled": bool(True)}
         else:
             return {"success": True, "enabled": bool(False)}
+       
+    except pyodbc.Error as ex:
+        sqlstate = ex.args[0]
+        return {"success": False, "message": f"Database error: {sqlstate} - {ex.args[1]}"}
+    except Exception as e:
+        return {"success": False, "message": f"An unexpected error occurred: {e}"}
+    finally:
+        if 'cnxn' in locals() and cnxn:
+            cnxn.close()
+
+""" notifications """
+def notif_profile(data, uid):
+
+    conn_str = get_db_connection_string()
+    if not conn_str:
+        return {"success": False, "message": "Database configuration error."}
+
+    try:
+        cnxn = pyodbc.connect(conn_str)
+        cursor = cnxn.cursor()
+ 
+        notif = data.get("notif")
+
+        cursor.execute("""
+            UPDATE Users
+            SET notifications = ?
+            WHERE firebase_uid = ?
+        """, (notif, uid))
+                    
+        cnxn.commit()
+
+        return {
+            "success": True, "message" : "Update notification successful"
+        } 
+       
+    except pyodbc.Error as ex:
+        sqlstate = ex.args[0]
+        return {"success": False, "message": f"Database error: {sqlstate} - {ex.args[1]}"}
+    except Exception as e:
+        return {"success": False, "message": f"An unexpected error occurred: {e}"}
+    finally:
+        if 'cnxn' in locals() and cnxn:
+            cnxn.close()
+
+def darkmode_profile(data, uid):
+
+    conn_str = get_db_connection_string()
+    if not conn_str:
+        return {"success": False, "message": "Database configuration error."}
+
+    try:
+        cnxn = pyodbc.connect(conn_str)
+        cursor = cnxn.cursor()
+ 
+        darkmode = data.get("darkmode") 
+
+        cursor.execute("""
+            UPDATE Users
+            SET darkmode = ?
+            WHERE firebase_uid = ?
+        """, (darkmode, uid))
+                    
+        cnxn.commit()
+
+        return {
+            "success": True, "message" : "Update notification successful"
+        } 
        
     except pyodbc.Error as ex:
         sqlstate = ex.args[0]

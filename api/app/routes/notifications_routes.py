@@ -34,8 +34,7 @@ def update_notifications(notif_id):
     return jsonify(result), status_code
 
 @notifications_bp.route('/notifications/fcm_token', methods=['POST'])
-def save_notifications():  
-    # Get Firebase UID from token
+def save_notifications():
     uid, error_response, status_code = get_firebase_uid() 
     if not uid:
         return error_response, status_code

@@ -29,9 +29,7 @@ def schedule_collections(data, userid):
             return {"success": False, "message": "No default pricing found."}
 
         rate_perkg = float(row[0])   # convert Decimal → float
-        total_price = round(weight * rate_perkg, 2)
-
-        print(total_price)
+        total_price = round(weight * rate_perkg, 2) 
 
         if id == 0: 
             insert_query = """

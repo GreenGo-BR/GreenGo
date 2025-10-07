@@ -16,7 +16,7 @@ interface TwoFactorAuthProps {
 }
 
 export function TwoFactorAuth({ token, onBack }: TwoFactorAuthProps) {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const [isEnabled, setIsEnabled] = useState(false);
   const [step, setStep] = useState(1);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
@@ -46,7 +46,6 @@ export function TwoFactorAuth({ token, onBack }: TwoFactorAuthProps) {
   }, [token]);
 
   const handleEnable2FA = async () => {
-    const isPT = language === "pt-BR";
     setStep(2);
     setMessage(null);
 
@@ -65,7 +64,7 @@ export function TwoFactorAuth({ token, onBack }: TwoFactorAuthProps) {
       } else {
         setMessage({
           type: "error",
-          text: isPT
+          text: language
             ? "Erro ao ativar 2fa. Tente novamente."
             : "Error enable 2fa. Try again.",
         });
@@ -73,7 +72,7 @@ export function TwoFactorAuth({ token, onBack }: TwoFactorAuthProps) {
     } catch (error) {
       setMessage({
         type: "error",
-        text: isPT
+        text: language
           ? "Erro ao verificar código. Tente novamente."
           : "Error verifying code. Try again.",
       });
@@ -126,16 +125,34 @@ export function TwoFactorAuth({ token, onBack }: TwoFactorAuthProps) {
     }
   };
 
-  const handleDisable2FA = () => {
-    setIsEnabled(false);
-    setStep(1);
-    setMessage({
-      type: "success",
-      text:
-        language === "pt-BR"
-          ? "Verificação em duas etapas desativada"
-          : "Two-factor authentication disabled",
-    });
+  const handleDisable2FA = async () => {
+    try {
+      const payload = {
+        action: "disabled",
+        code: "",
+      };
+      const { data } = await api().post("/profile/twofa", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data?.success) {
+        setIsEnabled(false);
+        setStep(1);
+        setMessage({
+          type: "success",
+          text: language
+            ? "Verificação em duas etapas desativada"
+            : "Two-factor authentication disabled",
+        });
+      }
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: language
+          ? "Erro ao verificar código. Tente novamente."
+          : "Error disabled two-factor. Try again.",
+      });
+    }
   };
 
   return (

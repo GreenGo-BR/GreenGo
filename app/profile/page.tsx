@@ -54,7 +54,7 @@ function ProfilePage({ token }: ProfPageProps) {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-  const [notifications, setNotifications] = useState(true);
+  const [notifications, setNotifications] = useState(false);
   const [darkMode, setDarkMode] = useState(theme === "dark");
 
   useEffect(() => {
@@ -75,7 +75,8 @@ function ProfilePage({ token }: ProfPageProps) {
       });
 
       const profile = res.data.profile;
-
+      setNotifications(profile.notif == 0 ? false : true);
+      setTheme(profile.darkmode == 1 ? "dark" : "light");
       setUserData(profile);
     } catch (err) {
       console.error(err);
@@ -92,9 +93,35 @@ function ProfilePage({ token }: ProfPageProps) {
     phone: "",
   });
 
-  const handleThemeChange = (checked: boolean) => {
-    setDarkMode(checked);
-    setTheme(checked ? "dark" : "light");
+  const handleThemeChange = async (checked: boolean) => {
+    let payload = {
+      darkmode: checked == false ? 0 : 1,
+    };
+    const res = await api().post("/profile/darkmode", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (res.data) {
+      setDarkMode(checked);
+      setTheme(checked ? "dark" : "light");
+    }
+  };
+
+  const handleNotificationChange = async (checked: boolean) => {
+    let payload = {
+      notif: checked == false ? 0 : 1,
+    };
+
+    const res = await api().post("/profile/notifications", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.data) {
+      setNotifications(checked);
+    }
   };
 
   const handleLanguageChange = async () => {
@@ -391,7 +418,7 @@ function ProfilePage({ token }: ProfPageProps) {
                 </div>
                 <Switch
                   checked={notifications}
-                  onCheckedChange={setNotifications}
+                  onCheckedChange={handleNotificationChange}
                 />
               </div>
               <Separator />

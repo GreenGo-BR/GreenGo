@@ -21,14 +21,6 @@ type Collection = {
   estimatedWeight: number;
 };
 
-const walletData = {
-  balance: 87.5,
-  lastPayment: {
-    amount: 17.5,
-    date: "18/05/2024",
-  },
-};
-
 type HomePageProps = {
   token: string;
 };
@@ -37,40 +29,63 @@ function HomePage({ token }: HomePageProps) {
   const { t } = useLanguage();
   useScrollToTop();
   const [upcomingCollections, setCollections] = useState<Collection[]>([]);
+  const [walletData, setWalletData] = useState({
+    balance: 0.0,
+    lastPayment: {
+      amount: 0.0,
+      date: "",
+    },
+  });
 
   useEffect(() => {
-    const load = async () => {
+    if (!token) return;
+
+    const fetchHomeWallet = async () => {
       try {
-        await fetchUpcommingCollections(token);
+        const res = await api().get("/wallethomedata", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = res.data.result || {};
+
+        setWalletData({
+          balance: parseFloat(data.current_balance) || 0.0,
+          lastPayment: {
+            amount: parseFloat(data.last_payment_amount) || 0.0,
+            date: data.last_payment_date || "",
+          },
+        });
       } catch (err) {
-        console.error("Failed to load collections:", err);
+        console.error(err);
       }
     };
-    load();
-  }, [token]);
+    fetchHomeWallet();
 
-  const fetchUpcommingCollections = async (token: string) => {
-    try {
-      const res = await api().get("/collections", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const fetchUpcommingCollections = async () => {
+      try {
+        const res = await api().get("/collections", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const fetchedList = res.data.collections;
+        const fetchedList = res.data.collections;
 
-      const normalized = fetchedList.map((fetched: any) => ({
-        id: fetched.id,
-        date: fetched.collection_date,
-        time: fetched.collection_time,
-        address: fetched.pickup_address,
-        status: fetched.status,
-        estimatedWeight: fetched.weight,
-      }));
+        const normalized = fetchedList
+          .filter((fetched: any) => fetched.status !== "completed")
+          .map((fetched: any) => ({
+            id: fetched.id,
+            date: fetched.collection_date,
+            time: fetched.collection_time,
+            address: fetched.pickup_address,
+            status: fetched.status,
+            estimatedWeight: fetched.weight,
+          }));
 
-      setCollections(normalized);
-    } catch (error) {
-      console.error("Error fetching collection details:", error);
-    }
-  };
+        setCollections(normalized);
+      } catch (error) {
+        console.error("Error fetching collection details:", error);
+      }
+    };
+    fetchUpcommingCollections();
+  }, []);
 
   return (
     <div className="min-h-screen pb-20">

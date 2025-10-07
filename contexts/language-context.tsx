@@ -111,6 +111,42 @@ const translations: Translations = {
     "pt-BR": "em",
     "en-US": "on",
   },
+  "wallet.statement": {
+    "pt-BR": "Extrato da Carteira",
+    "en-US": "Wallet Statement",
+  },
+  "wallet.currentbalance": {
+    "pt-BR": "Saldo Atual",
+    "en-US": "Current Balance",
+  },
+  "wallet.totalincome": {
+    "pt-BR": "Total Recebido",
+    "en-US": "Total Income",
+  },
+  "wallet.totalexpense": {
+    "pt-BR": "Total Gasto",
+    "en-US": "Total Expense",
+  },
+  "wallet.all": {
+    "pt-BR": "Todas",
+    "en-US": "All",
+  },
+  "wallet.income": {
+    "pt-BR": "Entradas",
+    "en-US": "Income",
+  },
+  "wallet.expense": {
+    "pt-BR": "Saídas",
+    "en-US": "Expense",
+  },
+  "wallet.transactionhistory": {
+    "pt-BR": "Histórico de Transações",
+    "en-US": "Transaction History",
+  },
+  "wallet.transaction": {
+    "pt-BR": "Transações",
+    "en-US": "Transactions",
+  },
 
   // Coletas - Expandido
   "collections.title": {
